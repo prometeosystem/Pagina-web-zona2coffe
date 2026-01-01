@@ -1,0 +1,5 @@
+[
+  {"id":1,"name":"Iced Latte","price":"$45","desc":"Leche fría con espresso"},
+  {"id":2,"name":"Chocolate Frío","price":"$50","desc":"Chocolate, hielo y crema"},
+  {"id":3,"name":"Matcha Latte","price":"$48","desc":"Polvo matcha con leche"}
+]

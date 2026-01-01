@@ -1,0 +1,8 @@
+Place your assets here:
+- logo.png (exported from provided PDF)
+- assets/coffee1.jpg
+- assets/coffee2.jpg
+- assets/coffee3.jpg
+- assets/coffee4.jpg
+- assets/coffee5.jpg
+- assets/coffee6.jpg

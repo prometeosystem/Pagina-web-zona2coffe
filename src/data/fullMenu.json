@@ -1,0 +1,68 @@
+{
+  "bebidasCalientes": [
+    {"id": 1, "name": "Americano", "size": "M", "price": "40.00", "size2": "G", "price2": "45.00", "desc": "Pa' empezar el día."},
+    {"id": 2, "name": "Capuchino", "size": "M", "price": "55.00", "size2": "G", "price2": "60.00", "desc": "Expresso sencillo con leche espumada."},
+    {"id": 3, "name": "Energy Latte", "size": "M", "price": "60.00", "size2": "G", "price2": "65.00", "desc": "Expresso doble con leche cremosa."},
+    {"id": 4, "name": "Coco Yuki Latte", "size": "M", "price": "65.00", "size2": "G", "price2": "69.00", "desc": "Expresso doble con toque sabor coco y leche cremosa."},
+    {"id": 5, "name": "Chai ó Matcha", "size": "M", "price": "60.00", "size2": "G", "price2": "65.00", "desc": "Tés con leche cremosa."},
+    {"id": 6, "name": "Chai Sucio", "size": "M", "price": "65.00", "size2": "G", "price2": "70.00", "desc": "Té especiado con expresso café y leche cremosa."},
+    {"id": 7, "name": "Muka Rush", "size": "M", "price": "65.00", "size2": "G", "price2": "70.00", "desc": "Expresso con chocolate y leche cremosa."},
+    {"id": 8, "name": "Chocolate Dark Finish", "size": "M", "price": "65.00", "size2": "G", "price2": "70.00", "desc": "Chocolate de tu elección con leche cremosa."},
+    {"id": 9, "name": "Caramel | Irlandés", "size": "M", "price": "65.00", "size2": "G", "price2": "70.00", "desc": "Expresso acompañado del sabor a elección y leche cremosa."}
+  ],
+  "bebidasFrias": [
+    {"id": 10, "name": "Affogato", "price": "65.00", "desc": "Bola de helado acompañada de expresso doble."},
+    {"id": 11, "name": "Iced americano", "size": "M", "price": "50.00", "size2": "G", "price2": "55.00", "desc": "Elige tu americano helado o frapeado."},
+    {"id": 12, "name": "Iced Latte", "size": "M", "price": "55.00", "size2": "G", "price2": "60.00", "desc": "Elige tu latte helado o frapeado."},
+    {"id": 13, "name": "Expresso Honey", "size": "M", "price": "55.00", "size2": "G", "price2": "60.00", "desc": "Expresso doble + miel + agua tónica"},
+    {"id": 14, "name": "Expresso Tonic", "size": "M", "price": "50.00", "size2": "G", "price2": "55.00", "desc": "Expresso doble + agua tónica"},
+    {"id": 15, "name": "Orange Coffee", "size": "M", "price": "65.00", "size2": "G", "price2": "70.00", "desc": "Expresso doble + jugo de naranja + agua tónica"},
+    {"id": 16, "name": "Coco Yuki Latte", "size": "M", "price": "70.00", "size2": "G", "price2": "75.00", "desc": "Elígelo helado o frapeado"},
+    {"id": 17, "name": "Chai ó Matcha", "size": "M", "price": "70.00", "size2": "G", "price2": "75.00", "desc": "Elígelo helado o frapeado"},
+    {"id": 18, "name": "Moka Rush", "size": "M", "price": "65.00", "size2": "G", "price2": "70.00", "desc": "Expresso con chocolate helado o frapeado"},
+    {"id": 19, "name": "Chocolate Dark Finish", "size": "M", "price": "60.00", "size2": "G", "price2": "65.00", "desc": "Chocolate de tu gusto helado o frapeado"},
+    {"id": 20, "name": "Caramel | Irlandés | Pistache | Taro", "size": "M", "price": "70.00", "size2": "G", "price2": "75.00", "desc": "Elígelo helado o frapeado"},
+    {"id": 21, "name": "Smoothie de Mango ó Fresa", "size": "M", "price": "70.00", "size2": "G", "price2": "75.00", "desc": "Frappé base agua ó leche de tu fruta favorita"}
+  ],
+  "shotsEnergia": [
+    {"id": 22, "name": "Sprint shot", "price": "40.00", "desc": "Un expreso doble de energía para activar tu entrenamiento."},
+    {"id": 23, "name": "Peak point macchiato", "price": "45.00", "desc": "Expresso doble con un toque de espuma de leche, un boost suave pero decidido."},
+    {"id": 24, "name": "Flat White Run", "price": "55.00", "desc": "Expresso doble con leche cremosa, ideal para enfoque sostenido."},
+    {"id": 25, "name": "Long Run Americano", "price": "50.00", "desc": "Ligero y limpio para resistencia prolongada."},
+    {"id": 26, "name": "Energy Latte", "price": "65.00", "desc": "Clásico expresso doble con leche para recuperar energía."}
+  ],
+  "bebidasProteina": [
+    {"id": 27, "name": "Recovery Dúo Fruit", "price": "65.00", "desc": "Bebida base leche + plátano + fresas + scoop"},
+    {"id": 28, "name": "Power Boost Latte", "price": "65.00", "desc": "Bebida base leche + café + scoop"},
+    {"id": 29, "name": "Muscle Peanut", "price": "70.00", "desc": "Bebida base leche + crema de cacahuate + plátano + scoop"},
+    {"id": 30, "name": "Mango Marathon", "price": "75.00", "desc": "Bebida base leche + mango + miel + yogurt griego + scoop"},
+    {"id": 31, "name": "Speed Up Red", "price": "78.00", "desc": "Bebida base yogurt griego + frutos rojos + avena + scoop"},
+    {"id": 32, "name": "Zona Pro Matcha", "price": "80.00", "desc": "Bebida base leche + matcha + miel + fresas + scoop"},
+    {"id": 33, "name": "Core Blue", "price": "80.00", "desc": "Bebida base leche + moras + plátano + espirulina azul + scoop"},
+    {"id": 34, "name": "Antioxidant Fruit", "price": "85.00", "desc": "Água de coco + espirulina azul + fresas + avena + scoop"},
+    {"id": 35, "name": "Runner Brew", "price": "88.00", "desc": "Bebida base yogurt griego + mango + miel + matcha + scoop"}
+  ],
+  "menuDulce": [
+    {"id": 36, "name": "Yogur Bloom", "price": "98.00", "desc": "Yogurt griego + granola + miel + fruta de temporada"},
+    {"id": 37, "name": "Pan de temporada", "price": "75.00", "desc": "Pregunta por disponibilidad del pan recién horneado"},
+    {"id": 38, "name": "Chocobanana Sando", "price": "67.00", "desc": "Chocolate y plátano", "note": "SANDOS JAPONESES DE PAN BLANCO SIN ORILLAS, RELLENOS DE CREMA PASTELERA Y TOPPINGS DE TU GUSTO"},
+    {"id": 39, "name": "Fruit Sando", "price": "89.00", "desc": "Fresas, durazno y kiwi"},
+    {"id": 40, "name": "Ichigo Sando", "price": "92.00", "desc": "Fresas frescas"}
+  ],
+  "menuSalado": [
+    {"id": 41, "name": "CLASSIC SANDO", "price": "89.00", "desc": "Jamón, queso y tocino dulce crujiente", "note": "SANDOS JAPONESES DE PAN BLANCO SIN ORILLAS, RELLENOS DE MAYONESA, LECHUGA Y TOPPINGS DE TU GUSTO"},
+    {"id": 42, "name": "Tamago Sando", "price": "60.00", "desc": "Ensalada de huevo"},
+    {"id": 43, "name": "Mila Sando", "price": "145.00", "desc": "Milanesa de res"}
+  ],
+  "ensaladas": [
+    {"id": 44, "name": "Huevito Bowl", "price": "125.00", "desc": "Cherry, huevo duro y aderezo a elección", "note": "Bowl a base de lechuga italiana, espinaca, zanahoria, betabel y topping a elegir."},
+    {"id": 45, "name": "Tuna fit", "price": "135.00", "desc": "Cherry, atún y aderezo a elección"},
+    {"id": 46, "name": "Mila Green", "price": "145.00", "desc": "Cherry, milanesa de res, empanizado de la casa"}
+  ],
+  "otros": [
+    {"id": 47, "name": "Molletes", "price": "00.00", "desc": "Pan de la casa, frijoles, queso manchego, pico de gallo, chorizo o huevo"},
+    {"id": 48, "name": "Chilaquiles", "price": "00.00", "desc": "Totopos, crema, queso, salsa de la casa, huevo ó pollo, acompañados de frijoles refritos"}
+  ],
+  "notaLeche": "Selecciona tu tipo de leche (entera, deslactosada ó almendras)"
+}
+
