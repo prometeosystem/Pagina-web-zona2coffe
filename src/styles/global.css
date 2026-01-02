@@ -1771,3 +1771,62 @@ img[src] {
     height: 22px;
   }
 }
+
+/* ============================================
+   CHECKOUT MODAL
+   ============================================ */
+.checkout-modal-overlay {
+  animation: fadeIn 0.3s ease;
+}
+
+.checkout-modal {
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* SweetAlert Custom Styles */
+.swal-custom-popup {
+  border-radius: var(--radius-lg) !important;
+}
+
+.swal2-popup {
+  border-radius: var(--radius-lg) !important;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif !important;
+}
+
+.swal2-confirm {
+  background-color: var(--matcha-500) !important;
+  border: none !important;
+  border-radius: var(--radius) !important;
+}
+
+.swal2-confirm:hover {
+  background-color: var(--matcha-600) !important;
+}
+
+/* Responsive: Checkout Modal */
+@media (max-width: 767px) {
+  .checkout-modal {
+    max-width: 100% !important;
+    margin: 0.5rem;
+  }
+}

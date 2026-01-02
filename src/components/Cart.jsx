@@ -1,44 +1,91 @@
 import React, { useState } from 'react'
 import { useCart } from '../context/CartContext'
 import { createPreorden } from '../services/api'
+import CheckoutModal from './CheckoutModal'
+import Swal from 'sweetalert2'
 
 export default function Cart({ isOpen, onClose }) {
   const { cartItems, removeFromCart, updateQuantity, clearCart, getTotal, getTotalItems } = useCart()
   const [isProcessing, setIsProcessing] = useState(false)
   const [checkoutSuccess, setCheckoutSuccess] = useState(false)
   const [error, setError] = useState(null)
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false)
 
-  const handleCheckout = async () => {
+  const handleCheckoutClick = () => {
     if (cartItems.length === 0) return
+    setShowCheckoutModal(true)
+  }
 
+  const handleCheckoutConfirm = async (checkoutData, totalFinal) => {
     setIsProcessing(true)
     setError(null)
     setCheckoutSuccess(false)
+    setShowCheckoutModal(false)
 
     try {
-      // Crear la pre-orden según el formato que espera el backend
-      // El backend calcula el total automáticamente
+      // Preparar los detalles con observaciones si hay comentarios o tipo de leche
+      const detalles = cartItems.map(item => {
+        const observaciones = []
+        
+        // Agregar tipo de leche si es bebida
+        if (checkoutData.tipo_leche && checkoutData.tipo_leche === 'deslactosada') {
+          observaciones.push('Leche deslactosada')
+        }
+        
+        // Agregar comentarios generales si existen
+        if (checkoutData.comentarios) {
+          observaciones.push(checkoutData.comentarios)
+        }
+        
+        return {
+          id_producto: item.productId,
+          cantidad: item.quantity,
+          observaciones: observaciones.length > 0 ? observaciones.join(' - ') : null
+        }
+      })
+
+      // Crear la pre-orden con todos los datos
       const preordenData = {
-        nombre_cliente: null  // Opcional: puedes agregar un campo para capturar el nombre del cliente
+        nombre_cliente: checkoutData.nombre_cliente,
+        tipo_servicio: checkoutData.tipo_servicio,
+        comentarios: checkoutData.comentarios,
+        tipo_leche: checkoutData.tipo_leche,
+        extra_leche: checkoutData.extra_leche
       }
 
       // Llamar al endpoint con el formato correcto
-      const result = await createPreorden(preordenData, cartItems)
+      const result = await createPreorden(preordenData, detalles)
 
       // El backend retorna: { message, id_preorden, total }
       if (result && (result.id_preorden || result.id)) {
-        setCheckoutSuccess(true)
-        // Limpiar el carrito después de un éxito
-        setTimeout(() => {
-          clearCart()
-          setCheckoutSuccess(false)
-          onClose()
-        }, 3000)
+        // Mostrar SweetAlert de éxito
+        await Swal.fire({
+          icon: 'success',
+          title: '¡Pedido Creado Exitosamente!',
+          text: 'Favor de pasar a barra a pagar',
+          confirmButtonColor: 'var(--matcha-500)',
+          confirmButtonText: 'Entendido',
+          customClass: {
+            popup: 'swal-custom-popup'
+          }
+        })
+        
+        // Limpiar el carrito y cerrar
+        clearCart()
+        onClose()
       } else {
         throw new Error('No se recibió un ID de pre-orden válido')
       }
     } catch (error) {
       console.error('Error en checkout:', error)
+      // Mostrar SweetAlert de error
+      await Swal.fire({
+        icon: 'error',
+        title: 'Error al procesar el pedido',
+        text: error.message || 'Por favor intenta de nuevo',
+        confirmButtonColor: 'var(--matcha-500)',
+        confirmButtonText: 'OK'
+      })
       setError(error.message || 'Error al procesar tu pedido. Por favor intenta de nuevo.')
     } finally {
       setIsProcessing(false)
@@ -270,22 +317,7 @@ export default function Cart({ isOpen, onClose }) {
               background: 'var(--bg-light)'
             }}
           >
-            {/* Mensajes de éxito y error */}
-            {checkoutSuccess && (
-              <div 
-                className="alert alert-success mb-3"
-                style={{
-                  padding: '0.75rem 1rem',
-                  borderRadius: 'var(--radius)',
-                  background: 'var(--matcha-100)',
-                  border: '1px solid var(--matcha-300)',
-                  color: 'var(--matcha-700)'
-                }}
-              >
-                ✓ Pedido creado exitosamente. Pasa a caja para completar tu orden.
-              </div>
-            )}
-            
+            {/* Mensajes de error (los de éxito ahora se muestran con SweetAlert) */}
             {error && (
               <div 
                 className="alert alert-danger mb-3"
@@ -312,14 +344,14 @@ export default function Cart({ isOpen, onClose }) {
                 onClick={clearCart}
                 className="btn btn-outline-secondary flex-fill"
                 style={{ fontSize: '0.9375rem' }}
-                disabled={isProcessing || checkoutSuccess}
+                disabled={isProcessing}
               >
                 Limpiar
               </button>
               <button
-                onClick={handleCheckout}
+                onClick={handleCheckoutClick}
                 className="btn btn-reserve flex-fill"
-                disabled={isProcessing || checkoutSuccess}
+                disabled={isProcessing}
                 style={{ 
                   fontSize: '0.9375rem',
                   background: 'var(--matcha-500)',
@@ -332,8 +364,6 @@ export default function Cart({ isOpen, onClose }) {
                     <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                     Procesando...
                   </>
-                ) : checkoutSuccess ? (
-                  '✓ Pedido Creado'
                 ) : (
                   'Finalizar pedido'
                 )}
@@ -342,6 +372,14 @@ export default function Cart({ isOpen, onClose }) {
           </div>
         )}
       </div>
+      
+      {/* Modal de Checkout */}
+      <CheckoutModal
+        isOpen={showCheckoutModal}
+        onClose={() => setShowCheckoutModal(false)}
+        onConfirm={handleCheckoutConfirm}
+        cartItems={cartItems}
+      />
     </>
   )
 }

@@ -6,6 +6,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 import 'aos/dist/aos.css'
 import 'animate.css/animate.min.css'
+import 'sweetalert2/dist/sweetalert2.min.css'
 import AOS from 'aos'
 
 function Root(){

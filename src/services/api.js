@@ -45,25 +45,22 @@ export const validateProduct = async (productId) => {
 
 /**
  * Crea una pre-orden (pedido público desde la web)
- * @param {Object} preordenData - Datos de la pre-orden (nombre_cliente, observaciones generales)
- * @param {Array} items - Items del carrito
+ * @param {Object} preordenData - Datos de la pre-orden (nombre_cliente, tipo_servicio, comentarios, tipo_leche, extra_leche)
+ * @param {Array} detalles - Detalles de la pre-orden (ya formateados con id_producto, cantidad, observaciones)
  * @returns {Promise<Object>} - Respuesta del servidor con el ID de la pre-orden
  */
-export const createPreorden = async (preordenData, items) => {
+export const createPreorden = async (preordenData, detalles) => {
   try {
-    // Preparar los detalles según el formato que espera el backend
-    // El backend espera: detalles con id_producto, cantidad, observaciones (opcional)
-    const detalles = items.map(item => ({
-      id_producto: item.productId,
-      cantidad: item.quantity,
-      observaciones: item.observaciones || null  // Observaciones específicas del item (opcional)
-    }))
-
     // Crear la pre-orden según el schema PreordenCreate
     // El backend calcula el total y obtiene los precios de la BD
     const preordenPayload = {
       nombre_cliente: preordenData.nombre_cliente || null,  // Opcional
-      detalles: detalles  // ✅ Debe ser "detalles" no "items"
+      detalles: detalles,  // ✅ Debe ser "detalles" no "items"
+      // Campos adicionales que el backend puede usar (si los soporta)
+      tipo_servicio: preordenData.tipo_servicio || null,  // 'comer-aqui' o 'para-llevar'
+      comentarios: preordenData.comentarios || null,  // Comentarios generales
+      tipo_leche: preordenData.tipo_leche || null,  // 'entera' o 'deslactosada'
+      extra_leche: preordenData.extra_leche || 0  // Extra por leche deslactosada ($15)
     }
 
     const response = await fetch(`${API_BASE_URL}/preordenes/crear_preorden`, {
