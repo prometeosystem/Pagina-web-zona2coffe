@@ -1,5 +1,8 @@
-import React from 'react'
-import fullMenuData from '../data/fullMenu.json'
+import React, { useState } from 'react'
+import { useCart } from '../context/CartContext'
+import { useProductsByCategory } from '../hooks/useProducts'
+import FloatingCartButton from './FloatingCartButton'
+import fullMenuData from '../data/fullMenu.json' // Fallback si falla la carga del backend
 
 // Array de imágenes disponibles para usar como placeholders
 const PLACEHOLDER_IMAGES = [
@@ -11,7 +14,60 @@ const PLACEHOLDER_IMAGES = [
 
 // Componente para renderizar un item del menú
 const MenuItemCard = ({ item, imageIndex }) => {
-  const placeholderImg = PLACEHOLDER_IMAGES[(item.id + imageIndex) % PLACEHOLDER_IMAGES.length]
+  // Usar imagen del backend si existe, sino usar imagen por defecto
+  const productId = item.id || item.id_producto || 0
+  const backendImage = item.imagen || item.image_url || item.url_imagen || null
+  const placeholderImg = backendImage || PLACEHOLDER_IMAGES[(productId + imageIndex) % PLACEHOLDER_IMAGES.length]
+  const { addToCart } = useCart()
+  const [selectedSize, setSelectedSize] = useState(null)
+  const [showSizeSelector, setShowSizeSelector] = useState(false)
+  const [addingToCart, setAddingToCart] = useState(false)
+
+  const handleAddToCart = async () => {
+    // Si ya está procesando, no hacer nada
+    if (addingToCart) return
+
+    // Si el producto tiene tamaños, mostrar selector
+    if (item.size && !selectedSize) {
+      setShowSizeSelector(true)
+      return
+    }
+
+    // Si el precio es "00.00" o 0, no permitir agregar
+    const precio = parseFloat(item.price || item.precio || 0)
+    if (precio === 0 || item.price === "00.00") {
+      alert('Por favor consulta el precio antes de agregar este producto')
+      return
+    }
+
+    setAddingToCart(true)
+    try {
+      const success = await addToCart(item, selectedSize || null, 1)
+      
+      if (success) {
+        setShowSizeSelector(false)
+        setSelectedSize(null)
+        // Mostrar feedback visual
+        const button = document.querySelector(`[data-item-id="${item.id || item.id_producto}"]`)
+        if (button) {
+          button.classList.add('added-to-cart')
+          setTimeout(() => {
+            button.classList.remove('added-to-cart')
+          }, 1000)
+        }
+      }
+    } catch (error) {
+      console.error('Error agregando al carrito:', error)
+    } finally {
+      setAddingToCart(false)
+    }
+  }
+
+  const handleSizeSelect = (size) => {
+    setSelectedSize(size)
+    setShowSizeSelector(false)
+    handleAddToCart()
+  }
   
   return (
     <div className="col-12 col-md-6 col-lg-4">
@@ -20,7 +76,7 @@ const MenuItemCard = ({ item, imageIndex }) => {
           <img 
             src={placeholderImg} 
             className="card-img-top menu-item-image" 
-            alt={item.name}
+            alt={item.name || item.nombre}
             onError={(e) => {
               // Si la imagen falla, mostrar placeholder SVG
               e.target.style.display = 'none'
@@ -38,30 +94,89 @@ const MenuItemCard = ({ item, imageIndex }) => {
         </div>
         <div className="card-body">
           <div className="d-flex justify-content-between align-items-start mb-2">
-            <h5 className="card-title mb-0" style={{fontWeight: 700, color: 'var(--text)', fontSize: '1.25rem'}}>{item.name}</h5>
+            <h5 className="card-title mb-0" style={{fontWeight: 700, color: 'var(--text)', fontSize: '1.25rem'}}>{item.name || item.nombre}</h5>
           </div>
-          <p className="text-muted small mb-3" style={{minHeight: '48px', lineHeight: '1.6'}}>{item.desc}</p>
-          <div className="d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <p className="text-muted small mb-3" style={{minHeight: '48px', lineHeight: '1.6'}}>{item.desc || item.descripcion}</p>
+          <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
             <div>
-              {item.size ? (
+              {item.size || item.tamaño ? (
                 <>
-                  <span className="badge menu-price-badge me-2">{item.size} ${item.price}</span>
-                  <span className="badge menu-price-badge">{item.size2} ${item.price2}</span>
+                  <span className="badge menu-price-badge me-2">{item.size || item.tamaño} ${item.price || item.precio?.toFixed(2)}</span>
+                  {item.size2 && <span className="badge menu-price-badge">{item.size2} ${item.price2 || item.precio2?.toFixed(2)}</span>}
                 </>
               ) : (
                 <span className="badge menu-price-badge">
-                  {item.price === "00.00" ? "Consultar precio" : `$${item.price}`}
+                  {item.price === "00.00" || parseFloat(item.price || item.precio || 0) === 0 ? "Consultar precio" : `$${item.price || item.precio?.toFixed(2)}`}
                 </span>
               )}
             </div>
           </div>
+          
+          {/* Botón agregar al carrito */}
+          {item.price !== "00.00" && (
+            <div className="position-relative">
+              {showSizeSelector && item.size ? (
+                <div className="size-selector d-flex gap-2">
+                  <button
+                    className="btn btn-sm btn-outline-primary flex-fill"
+                    onClick={() => handleSizeSelect('M')}
+                    disabled={addingToCart}
+                  >
+                    {item.size} ${item.price}
+                  </button>
+                  {item.size2 && (
+                    <button
+                      className="btn btn-sm btn-outline-primary flex-fill"
+                      onClick={() => handleSizeSelect('G')}
+                      disabled={addingToCart}
+                    >
+                      {item.size2} ${item.price2}
+                    </button>
+                  )}
+                  <button
+                    className="btn btn-sm btn-outline-secondary"
+                    onClick={() => setShowSizeSelector(false)}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                <button
+                  data-item-id={item.id || item.id_producto}
+                  className="btn btn-add-to-cart w-100"
+                  onClick={handleAddToCart}
+                  disabled={addingToCart}
+                >
+                  {addingToCart ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      Agregando...
+                    </>
+                  ) : (
+                    <>
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style={{marginRight: '8px'}}>
+                        <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l1.313 7h8.17l1.313-7H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" fill="currentColor"/>
+                      </svg>
+                      Agregar al carrito
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
   )
 }
 
-export default function MenuPage({ onClose }){
+export default function MenuPage({ onClose, onCartClick, isCartOpen }){
+  const { productsByCategory, loading, error } = useProductsByCategory()
+  
+  // Usar productos del backend si están disponibles y hay productos, sino usar fallback del JSON
+  const hasBackendProducts = !loading && !error && Object.values(productsByCategory).some(cat => cat.length > 0)
+  const menuData = hasBackendProducts ? productsByCategory : fullMenuData
+
   const scrollToSection = (sectionId) => {
     const element = document.getElementById(sectionId)
     if (element) {
@@ -120,9 +235,19 @@ export default function MenuPage({ onClose }){
             </h2>
           </div>
           <div className="row g-4">
-            {fullMenuData.bebidasCalientes.map((item, idx) => (
-              <MenuItemCard key={item.id} item={item} imageIndex={idx} />
-            ))}
+            {loading ? (
+              <div className="col-12 text-center py-5">
+                <div className="spinner-border" style={{color: 'var(--matcha-600)'}} role="status">
+                  <span className="visually-hidden">Cargando...</span>
+                </div>
+              </div>
+            ) : menuData.bebidasCalientes && menuData.bebidasCalientes.length > 0 ? (
+              menuData.bebidasCalientes.map((item, idx) => (
+                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx} />
+              ))
+            ) : (
+              !loading && <div className="col-12 text-center text-muted py-3">No hay productos disponibles</div>
+            )}
           </div>
         </section>
 
@@ -134,9 +259,11 @@ export default function MenuPage({ onClose }){
             </h2>
           </div>
           <div className="row g-4">
-            {fullMenuData.bebidasFrias.map((item, idx) => (
-              <MenuItemCard key={item.id} item={item} imageIndex={idx + 10} />
-            ))}
+            {menuData.bebidasFrias && menuData.bebidasFrias.length > 0 ? (
+              menuData.bebidasFrias.map((item, idx) => (
+                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 10} />
+              ))
+            ) : null}
           </div>
         </section>
 
@@ -148,9 +275,11 @@ export default function MenuPage({ onClose }){
             </h2>
           </div>
           <div className="row g-4">
-            {fullMenuData.shotsEnergia.map((item, idx) => (
-              <MenuItemCard key={item.id} item={item} imageIndex={idx + 20} />
-            ))}
+            {menuData.shotsEnergia && menuData.shotsEnergia.length > 0 ? (
+              menuData.shotsEnergia.map((item, idx) => (
+                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 20} />
+              ))
+            ) : null}
           </div>
         </section>
 
@@ -162,9 +291,11 @@ export default function MenuPage({ onClose }){
             </h2>
           </div>
           <div className="row g-4">
-            {fullMenuData.bebidasProteina.map((item, idx) => (
-              <MenuItemCard key={item.id} item={item} imageIndex={idx + 30} />
-            ))}
+            {menuData.bebidasProteina && menuData.bebidasProteina.length > 0 ? (
+              menuData.bebidasProteina.map((item, idx) => (
+                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 30} />
+              ))
+            ) : null}
           </div>
         </section>
 
@@ -179,9 +310,11 @@ export default function MenuPage({ onClose }){
             SANDOS JAPONESES DE PAN BLANCO SIN ORILLAS, RELLENOS DE CREMA PASTELERA Y TOPPINGS DE TU GUSTO
           </p>
           <div className="row g-4">
-            {fullMenuData.menuDulce.map((item, idx) => (
-              <MenuItemCard key={item.id} item={item} imageIndex={idx + 40} />
-            ))}
+            {menuData.menuDulce && menuData.menuDulce.length > 0 ? (
+              menuData.menuDulce.map((item, idx) => (
+                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 40} />
+              ))
+            ) : null}
           </div>
         </section>
 
@@ -196,9 +329,11 @@ export default function MenuPage({ onClose }){
             SANDOS JAPONESES DE PAN BLANCO SIN ORILLAS, RELLENOS DE MAYONESA, LECHUGA Y TOPPINGS DE TU GUSTO
           </p>
           <div className="row g-4">
-            {fullMenuData.menuSalado.map((item, idx) => (
-              <MenuItemCard key={item.id} item={item} imageIndex={idx + 50} />
-            ))}
+            {menuData.menuSalado && menuData.menuSalado.length > 0 ? (
+              menuData.menuSalado.map((item, idx) => (
+                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 50} />
+              ))
+            ) : null}
           </div>
         </section>
 
@@ -213,9 +348,11 @@ export default function MenuPage({ onClose }){
             Bowl a base de lechuga italiana, espinaca, zanahoria, betabel y topping a elegir.
           </p>
           <div className="row g-4">
-            {fullMenuData.ensaladas.map((item, idx) => (
-              <MenuItemCard key={item.id} item={item} imageIndex={idx + 60} />
-            ))}
+            {menuData.ensaladas && menuData.ensaladas.length > 0 ? (
+              menuData.ensaladas.map((item, idx) => (
+                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 60} />
+              ))
+            ) : null}
           </div>
         </section>
 
@@ -227,12 +364,16 @@ export default function MenuPage({ onClose }){
             </h2>
           </div>
           <div className="row g-4">
-            {fullMenuData.otros.map((item, idx) => (
-              <MenuItemCard key={item.id} item={item} imageIndex={idx + 70} />
-            ))}
+            {menuData.otros && menuData.otros.length > 0 ? (
+              menuData.otros.map((item, idx) => (
+                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 70} />
+              ))
+            ) : null}
           </div>
         </section>
       </div>
+      {/* Botón flotante del carrito */}
+      <FloatingCartButton onClick={onCartClick} isCartOpen={isCartOpen} />
     </div>
   )
 }

@@ -1529,3 +1529,245 @@ img[src] {
     padding: 1rem;
   }
 }
+
+/* ============================================
+   CART STYLES
+   ============================================ */
+.cart-btn {
+  transition: all var(--transition-base);
+}
+
+.cart-btn:hover {
+  background: rgba(45, 90, 39, 0.08) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(45, 90, 39, 0.15);
+  border-color: var(--matcha-600) !important;
+}
+
+.cart-badge {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+/* ============================================
+   ADD TO CART BUTTON
+   ============================================ */
+.btn-add-to-cart {
+  background: var(--matcha-500) !important;
+  color: #fff !important;
+  border: none !important;
+  font-weight: 600;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-sm);
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-add-to-cart:hover {
+  background: var(--matcha-600) !important;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-matcha);
+  color: #fff !important;
+}
+
+.btn-add-to-cart:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-add-to-cart.added-to-cart {
+  background: var(--coffee-500) !important;
+  animation: successPulse 0.5s ease;
+}
+
+@keyframes successPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.size-selector {
+  margin-top: 0.5rem;
+}
+
+.size-selector .btn {
+  font-weight: 600;
+  transition: all var(--transition-base);
+}
+
+.size-selector .btn-outline-primary {
+  border-color: var(--matcha-500);
+  color: var(--matcha-600);
+}
+
+.size-selector .btn-outline-primary:hover {
+  background: var(--matcha-500);
+  color: #fff;
+  border-color: var(--matcha-500);
+}
+
+.size-selector .btn-outline-secondary {
+  border-color: var(--gray-400);
+  color: var(--text);
+}
+
+.size-selector .btn-outline-secondary:hover {
+  background: var(--gray-400);
+  color: #fff;
+}
+
+/* Responsive: Cart */
+@media (max-width: 767px) {
+  .cart-sidebar {
+    max-width: 100% !important;
+  }
+  
+  .cart-btn span:not(.cart-badge) {
+    display: none;
+  }
+  
+  .cart-btn {
+    padding: 0.625rem !important;
+    min-width: 44px;
+  }
+}
+
+/* ============================================
+   CART ITEM STYLES
+   ============================================ */
+.cart-item {
+  transition: all var(--transition-base);
+}
+
+.cart-item:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--matcha-300) !important;
+}
+
+.cart-items::-webkit-scrollbar {
+  width: 8px;
+}
+
+.cart-items::-webkit-scrollbar-track {
+  background: var(--gray-100);
+  border-radius: var(--radius);
+}
+
+.cart-items::-webkit-scrollbar-thumb {
+  background: var(--gray-300);
+  border-radius: var(--radius);
+}
+
+.cart-items::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-400);
+}
+
+/* ============================================
+   FLOATING CART BUTTON
+   ============================================ */
+.floating-cart-button {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--matcha-500);
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 20px rgba(45, 90, 39, 0.3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1060;
+  transition: all var(--transition-base);
+  padding: 0;
+}
+
+.floating-cart-button:hover {
+  background: var(--matcha-600);
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 6px 25px rgba(45, 90, 39, 0.4);
+}
+
+.floating-cart-button:active {
+  transform: translateY(-2px) scale(1.02);
+}
+
+.floating-cart-button svg {
+  width: 28px;
+  height: 28px;
+}
+
+.floating-cart-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--coffee-600);
+  color: #fff;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: 2px solid var(--bg-light);
+  animation: pulse 2s infinite;
+}
+
+/* Responsive: Floating Cart Button */
+@media (max-width: 767px) {
+  .floating-cart-button {
+    width: 56px;
+    height: 56px;
+    bottom: 1.5rem;
+    right: 1.5rem;
+  }
+  
+  .floating-cart-button svg {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .floating-cart-badge {
+    width: 20px;
+    height: 20px;
+    font-size: 0.6875rem;
+    top: -2px;
+    right: -2px;
+  }
+}
+
+@media (max-width: 576px) {
+  .floating-cart-button {
+    width: 52px;
+    height: 52px;
+    bottom: 1rem;
+    right: 1rem;
+  }
+  
+  .floating-cart-button svg {
+    width: 22px;
+    height: 22px;
+  }
+}

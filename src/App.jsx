@@ -5,10 +5,12 @@ import Menu from './components/Menu'
 import Gallery from './components/Gallery'
 import Footer from './components/Footer'
 import MenuPage from './components/MenuPage'
-import menuData from './data/menu.json'
+import Cart from './components/Cart'
+import { CartProvider } from './context/CartContext'
 
 export default function App(){
   const [showMenuPage, setShowMenuPage] = useState(false)
+  const [showCart, setShowCart] = useState(false)
 
   useEffect(() => {
     // Manejar hash en URL para mostrar menú
@@ -44,29 +46,43 @@ export default function App(){
     window.scrollTo(0, 0)
   }
 
+  const handleShowCart = () => {
+    setShowCart(true)
+  }
+
+  const handleCloseCart = () => {
+    setShowCart(false)
+  }
+
   if (showMenuPage) {
     return (
-      <div className="app">
-        <Header onMenuClick={handleShowMenu} />
-        <main>
-          <MenuPage onClose={handleCloseMenu} />
-        </main>
-        <Footer />
-      </div>
+      <CartProvider>
+        <div className="app">
+          <Header onMenuClick={handleShowMenu} />
+          <main>
+            <MenuPage onClose={handleCloseMenu} onCartClick={handleShowCart} isCartOpen={showCart} />
+          </main>
+          <Footer />
+          <Cart isOpen={showCart} onClose={handleCloseCart} />
+        </div>
+      </CartProvider>
     )
   }
 
   return (
-    <div className="app">
-      <Header onMenuClick={handleShowMenu} />
-      <main>
-        <Hero onMenuClick={handleShowMenu} />
-        <section className="container">
-          <Menu items={menuData} />
-          <Gallery />
-        </section>
-      </main>
-      <Footer />
-    </div>
+    <CartProvider>
+      <div className="app">
+        <Header onMenuClick={handleShowMenu} />
+        <main>
+          <Hero onMenuClick={handleShowMenu} />
+          <section className="container">
+            <Menu />
+            <Gallery />
+          </section>
+        </main>
+        <Footer />
+        <Cart isOpen={showCart} onClose={handleCloseCart} />
+      </div>
+    </CartProvider>
   )
 }
