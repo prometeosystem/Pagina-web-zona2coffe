@@ -255,10 +255,11 @@ export default function Cart({ isOpen, onClose }) {
                     </button>
                   </div>
                   
-                  <div className="d-flex justify-content-between align-items-center">
-                    <div className="d-flex align-items-center gap-2">
+                  <div className="d-flex justify-content-between align-items-center cart-item-footer">
+                    <div className="d-flex align-items-center gap-2 cart-quantity-controls">
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        className="cart-quantity-btn"
                         style={{
                           background: 'var(--gray-200)',
                           border: 'none',
@@ -275,11 +276,12 @@ export default function Cart({ isOpen, onClose }) {
                       >
                         −
                       </button>
-                      <span style={{ minWidth: '2rem', textAlign: 'center', fontWeight: 600 }}>
+                      <span className="cart-quantity-value" style={{ minWidth: '2rem', textAlign: 'center', fontWeight: 600 }}>
                         {item.quantity}
                       </span>
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        className="cart-quantity-btn"
                         style={{
                           background: 'var(--gray-200)',
                           border: 'none',
@@ -297,7 +299,7 @@ export default function Cart({ isOpen, onClose }) {
                         +
                       </button>
                     </div>
-                    <strong style={{ fontSize: '1.125rem', color: 'var(--matcha-600)' }}>
+                    <strong className="cart-item-price" style={{ fontSize: '1.125rem', color: 'var(--matcha-600)' }}>
                       {formatPrice(item.price * item.quantity)}
                     </strong>
                   </div>
@@ -342,6 +344,7 @@ export default function Cart({ isOpen, onClose }) {
             
             {/* Mensaje informativo sobre el pago */}
             <div 
+              className="cart-info-message"
               style={{
                 background: 'linear-gradient(135deg, rgba(45, 90, 39, 0.08) 0%, rgba(45, 90, 39, 0.04) 100%)',
                 border: '1.5px solid var(--matcha-200)',
@@ -353,7 +356,7 @@ export default function Cart({ isOpen, onClose }) {
                 gap: '0.875rem'
               }}
             >
-              <div style={{
+              <div className="cart-info-icon" style={{
                 background: 'var(--matcha-500)',
                 borderRadius: '50%',
                 width: '28px',
@@ -369,8 +372,8 @@ export default function Cart({ isOpen, onClose }) {
                   <path d="M8 1.5C4.41 1.5 1.5 4.41 1.5 8S4.41 14.5 8 14.5 14.5 11.59 14.5 8 11.59 1.5 8 1.5zM8 13C5.24 13 3 10.76 3 8S5.24 3 8 3 13 5.24 13 8 10.76 13 8 13zM8.25 5.5H7.5V8.25L9.625 9.5l.5-.75L8.5 7.5V5.5H8.25z" fill="#fff"/>
                 </svg>
               </div>
-              <div style={{ flex: 1 }}>
-                <p style={{
+              <div className="cart-info-content" style={{ flex: 1 }}>
+                <p className="cart-info-title" style={{
                   margin: 0,
                   fontSize: '0.9375rem',
                   lineHeight: '1.6',
@@ -380,7 +383,7 @@ export default function Cart({ isOpen, onClose }) {
                 }}>
                   Tu pedido comenzará a prepararse una vez que completes el pago
                 </p>
-                <p style={{
+                <p className="cart-info-text" style={{
                   margin: 0,
                   fontSize: '0.8125rem',
                   lineHeight: '1.5',
@@ -391,10 +394,10 @@ export default function Cart({ isOpen, onClose }) {
               </div>
             </div>
             
-            <div className="d-flex gap-2">
+            <div className="d-flex gap-2 cart-footer-buttons">
               <button
                 onClick={clearCart}
-                className="btn btn-outline-secondary flex-fill"
+                className="btn btn-outline-secondary flex-fill cart-clear-btn"
                 style={{ fontSize: '0.9375rem' }}
                 disabled={isProcessing}
               >
@@ -402,7 +405,7 @@ export default function Cart({ isOpen, onClose }) {
               </button>
               <button
                 onClick={handleCheckoutClick}
-                className="btn btn-reserve flex-fill"
+                className="btn btn-reserve flex-fill cart-checkout-btn"
                 disabled={isProcessing}
                 style={{ 
                   fontSize: '0.9375rem',
