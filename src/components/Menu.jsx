@@ -53,7 +53,9 @@ export default function Menu({items=[]}){
                 '/assets/imagenUno.jpg','/assets/imagenDos.jpg','/assets/imagenTres.jpg','/assets/imagenCuatro.jpg','/assets/imagenCinco.jpg',
                 '/assets/imagenSeis.jpg','/assets/imagenSiete.jpg','/assets/imagenOcho.jpg','/assets/imagenNueve.jpg','/assets/imagenDiez.jpg'
               ]
-              const img = item.image || images[idx % images.length]
+              // Usar imagen del backend si existe, sino usar placeholder local
+              const backendImage = item.image || item.imagen || item.image_url || item.url_imagen || null
+              const img = backendImage || images[idx % images.length]
               const originalPrice = getFormattedPrice(item)
               const discountPrice = getDiscountPrice(item.price || item.precio)
               return (

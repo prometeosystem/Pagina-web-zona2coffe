@@ -16,7 +16,7 @@ const PLACEHOLDER_IMAGES = [
 const MenuItemCard = ({ item, imageIndex }) => {
   // Usar imagen del backend si existe, sino usar imagen por defecto
   const productId = item.id || item.id_producto || 0
-  const backendImage = item.imagen || item.image_url || item.url_imagen || null
+  const backendImage = item.image || item.imagen || item.image_url || item.url_imagen || null
   const placeholderImg = backendImage || PLACEHOLDER_IMAGES[(productId + imageIndex) % PLACEHOLDER_IMAGES.length]
   const { addToCart } = useCart()
   const [selectedSize, setSelectedSize] = useState(null)

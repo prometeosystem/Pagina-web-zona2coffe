@@ -15,8 +15,8 @@ export default function Header({ onMenuClick }){
       <nav className="navbar navbar-expand-lg navbar-light">
         <div className="container">
           <a className="navbar-brand d-flex align-items-center" href="#" onClick={(e) => { e.preventDefault(); window.location.hash = ''; window.location.reload() }}>
-            <div style={{width:110,height:110,overflow:'hidden',borderRadius:12,display:'flex',alignItems:'center',justifyContent:'center',marginRight:12,background:'transparent'}}>
-              <img src="/assets/logo.jpeg" alt="Zona 2" className="site-logo" style={{height:90,objectFit:'contain'}} onError={(e)=>{e.currentTarget.style.display='none'}} />
+            <div style={{width:110,height:110,overflow:'visible',borderRadius:12,display:'flex',alignItems:'center',justifyContent:'center',background:'transparent'}}>
+              <img src="/assets/logo.jpeg" alt="Zona 2" className="site-logo" style={{height:90,width:'auto',objectFit:'contain',maxWidth:'100%'}} onError={(e)=>{e.currentTarget.style.display='none'}} />
             </div>
           </a>
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getProducts } from '../services/api'
+import { getProducts, API_BASE_URL } from '../services/api'
 
 /**
  * Hook para obtener productos del backend
@@ -30,10 +30,23 @@ export const useProducts = () => {
               ? precio.toFixed(0) 
               : precio.toFixed(2)
 
+            const productId = product.id_producto || product.id
+            // El backend puede enviar imagen_url como data URL base64 O solo tipo_imagen
+            // Si hay imagen_url (data URL), usarlo directamente
+            // Si no hay imagen_url pero hay tipo_imagen, construir URL del endpoint
+            let imageUrl = null
+            if (product.imagen_url) {
+              // Prioridad 1: usar imagen_url del backend (data URL base64)
+              imageUrl = product.imagen_url
+            } else if (product.tipo_imagen && product.tipo_imagen.trim() !== '') {
+              // Prioridad 2: si hay tipo_imagen pero no imagen_url, usar endpoint del backend
+              imageUrl = `${API_BASE_URL}/productos/imagen/${productId}`
+            }
+
             return {
               // IDs - compatible con ambos formatos
-              id: product.id_producto || product.id,
-              id_producto: product.id_producto || product.id,
+              id: productId,
+              id_producto: productId,
               
               // Nombres
               name: product.nombre || product.name || '',
@@ -46,6 +59,12 @@ export const useProducts = () => {
               // Precios - mantener ambos formatos
               price: precioFormateado,
               precio: precio,
+              
+              // Imagen del backend - usar imagen_url (data URL) si existe, sino null
+              image: imageUrl,
+              imagen: imageUrl,
+              image_url: imageUrl,
+              url_imagen: imageUrl,
               
               // Tamaños (si el backend los tiene en el futuro)
               size: product.tamaño || product.size || null,
