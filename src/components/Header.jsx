@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 
 export default function Header({ onMenuClick }){
   const MAP_ADDRESS = 'C. Ceres 109, Delicias, 62330 Cuernavaca, Mor.'
@@ -6,14 +6,23 @@ export default function Header({ onMenuClick }){
   // Función para cerrar el menú hamburguesa
   const closeNavbar = () => {
     const navbarCollapse = document.getElementById('navbarNav')
-    if (navbarCollapse && window.bootstrap) {
-      const bsCollapse = window.bootstrap.Collapse.getInstance(navbarCollapse)
-      if (bsCollapse) {
-        bsCollapse.hide()
-      } else {
-        // Si no existe instancia, crear una y ocultarla
-        const collapse = new window.bootstrap.Collapse(navbarCollapse, { toggle: false })
-        collapse.hide()
+    if (navbarCollapse) {
+      // Remover la clase 'show' directamente
+      navbarCollapse.classList.remove('show')
+      
+      // Cerrar usando Bootstrap si está disponible
+      if (window.bootstrap) {
+        const bsCollapse = window.bootstrap.Collapse.getInstance(navbarCollapse)
+        if (bsCollapse && !bsCollapse._isTransitioning) {
+          bsCollapse.hide()
+        }
+      }
+      
+      // Actualizar el botón del toggler
+      const toggler = document.querySelector('.navbar-toggler')
+      if (toggler) {
+        toggler.setAttribute('aria-expanded', 'false')
+        toggler.classList.add('collapsed')
       }
     }
   }

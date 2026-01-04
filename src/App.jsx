@@ -76,7 +76,7 @@ export default function App(){
         <main>
           <Hero onMenuClick={handleShowMenu} />
           <section className="container">
-            <Menu />
+            {/* <Menu /> */}
             <Gallery />
           </section>
         </main>
