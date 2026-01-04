@@ -1,23 +1,34 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef, useCallback } from 'react'
 
 const SLIDES = [
-  '/assets/imagenOcho.jpg',
-  '/assets/imagenDiez.jpg',
-  '/assets/imagenUno.jpg'
+  '/assets/imagenUno.jpg',
+  '/assets/imagenDos.jpg',
+  '/assets/imagenTres.jpg',
+  '/assets/imagenCuatro.jpg',
+  '/assets/imagenCinco.jpg'
 ]
 
 export default function Hero({ onMenuClick }){
   const [index, setIndex] = useState(0)
+  const [isTransitioning, setIsTransitioning] = useState(false)
   const mounted = useRef(true)
 
-  useEffect(()=>{
-    mounted.current = true
-    const id = setInterval(()=>{
-      if(!mounted.current) return
-      setIndex(i=> (i+1) % SLIDES.length)
-    }, 15000)
-    return ()=>{ mounted.current = false; clearInterval(id) }
-  },[])
+  const triggerTransition = useCallback(() => {
+    setIsTransitioning(true)
+    setTimeout(() => {
+      setIsTransitioning(false)
+    }, 600) // Duración de la animación
+  }, [])
+
+  const handleNext = useCallback(() => {
+    triggerTransition()
+    setIndex((prev) => (prev + 1) % SLIDES.length)
+  }, [triggerTransition])
+
+  const handlePrev = useCallback(() => {
+    triggerTransition()
+    setIndex((prev) => (prev - 1 + SLIDES.length) % SLIDES.length)
+  }, [triggerTransition])
 
   const handleMenuClick = (e) => {
     e.preventDefault()
@@ -28,26 +39,64 @@ export default function Hero({ onMenuClick }){
     }
   }
 
+  useEffect(()=>{
+    mounted.current = true
+    const id = setInterval(()=>{
+      if(!mounted.current) return
+      handleNext()
+    }, 5000)
+    return ()=>{ mounted.current = false; clearInterval(id) }
+  }, [handleNext])
+
+  // Calcular índices para mostrar 3 imágenes (anterior, actual, siguiente)
+  const getImageIndex = (offset) => {
+    return (index + offset + SLIDES.length) % SLIDES.length
+  }
+
   return (
     <section className="hero">
       <div className="container">
-        <div className="row align-items-stretch g-0 hero-row">
-          <div className="col-lg-6 d-flex flex-column justify-content-center left-col" data-aos="fade-right">
-            <h2 className="display-5">Bienvenido a Zona 2</h2>
-            <p className="lead text-muted">Especialistas en recuperar tu energía con el mejor café, postres caseros y un ambiente único.</p>
-            <div className="mt-4 d-flex gap-2">
-              <a href="#menu" className="btn btn-lg btn-reserve" onClick={handleMenuClick}>Ver Menú</a>
-              <a href="#nosotros" className="btn btn-lg menu-pill">Nosotros</a>
+        <div className="hero-content-wrapper">
+          <div className="hero-text-section" data-aos="fade-down">
+            <h1 className="hero-title">
+              <span className="hero-title-small">Bienvenido a</span>
+              <span className="hero-title-main">Zona 2</span>
+            </h1>
+            <p className="hero-description">Especialistas en recuperar tu energía con el mejor café, postres caseros y un ambiente único.</p>
+            <div className="hero-buttons">
+              <a href="#menu" className="btn btn-lg menu-category-btn" onClick={handleMenuClick}>Ver Menú</a>
+              <a href="#nosotros" className="btn btn-lg menu-category-btn">Nosotros</a>
             </div>
-          </div>
-          <div className="col-lg-6 d-flex align-items-stretch right-col" data-aos="zoom-in">
           </div>
         </div>
       </div>
-      <div className="hero-media">
-        {SLIDES.map((src, i)=> (
-          <div key={i} className={`slide ${i===index? 'active':''}`} style={{backgroundImage:`url(${src})`}} aria-hidden={i!==index}></div>
-        ))}
+      
+      <div className="hero-carousel-wrapper" data-aos="fade-up" data-aos-delay="200">
+        <div className="hero-carousel">
+          <button className="carousel-nav carousel-prev" onClick={handlePrev} aria-label="Imagen anterior" data-aos="fade-right" data-aos-delay="400">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M15 18l-6-6 6-6"/>
+            </svg>
+          </button>
+          
+          <div className={`carousel-images ${isTransitioning ? 'transitioning' : ''}`}>
+            <div className="carousel-image carousel-image-left active" data-aos="fade-right" data-aos-delay="300">
+              <img src={SLIDES[getImageIndex(-1)]} alt="Imagen anterior" key={`left-${getImageIndex(-1)}-${index}`} />
+            </div>
+            <div className="carousel-image carousel-image-center active" data-aos="zoom-in" data-aos-delay="400">
+              <img src={SLIDES[getImageIndex(0)]} alt="Imagen principal" key={`center-${getImageIndex(0)}-${index}`} />
+            </div>
+            <div className="carousel-image carousel-image-right active" data-aos="fade-left" data-aos-delay="300">
+              <img src={SLIDES[getImageIndex(1)]} alt="Imagen siguiente" key={`right-${getImageIndex(1)}-${index}`} />
+            </div>
+          </div>
+          
+          <button className="carousel-nav carousel-next" onClick={handleNext} aria-label="Imagen siguiente" data-aos="fade-left" data-aos-delay="400">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </button>
+        </div>
       </div>
     </section>
   )

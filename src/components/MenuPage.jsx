@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useCart } from '../context/CartContext'
 import { useProductsByCategory } from '../hooks/useProducts'
 import FloatingCartButton from './FloatingCartButton'
+import FloatingMenuButton from './FloatingMenuButton'
 import fullMenuData from '../data/fullMenu.json' // Fallback si falla la carga del backend
 
 // Array de imágenes disponibles para usar como placeholders
@@ -374,6 +375,8 @@ export default function MenuPage({ onClose, onCartClick, isCartOpen }){
       </div>
       {/* Botón flotante del carrito */}
       <FloatingCartButton onClick={onCartClick} isCartOpen={isCartOpen} />
+      {/* Botón flotante del menú de categorías */}
+      <FloatingMenuButton isCartOpen={isCartOpen} />
     </div>
   )
 }
