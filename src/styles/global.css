@@ -1,12 +1,63 @@
 @import './variables.css';
 
+/* Prevenir scroll horizontal globalmente - REGLA CRÍTICA */
+html {
+  overflow-x: hidden !important;
+  max-width: 100vw !important;
+  width: 100% !important;
+  position: relative;
+}
+
+body {
+  overflow-x: hidden !important;
+  max-width: 100vw !important;
+  width: 100% !important;
+  position: relative;
+}
+
+/* Aplicar a todos los elementos */
 * {
   box-sizing: border-box;
+}
+
+/* Contenedores principales */
+#root {
+  max-width: 100vw !important;
+  width: 100% !important;
+  overflow-x: hidden !important;
+  position: relative;
+}
+
+.app {
+  max-width: 100vw !important;
+  width: 100% !important;
+  overflow-x: hidden !important;
+  position: relative;
+}
+
+main, section, header, nav, footer {
+  max-width: 100% !important;
+  width: 100% !important;
+  overflow-x: hidden !important;
+  box-sizing: border-box;
+}
+
+/* Excepciones para elementos inline */
+span, a, em, strong, small, b, i, u, mark, code, kbd, samp, var {
+  max-width: none;
+}
+
+html {
+  overflow-x: hidden !important;
+  width: 100%;
+  max-width: 100vw;
+  position: relative;
 }
 
 body {
   font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
   margin: 0;
+  padding: 0;
   background: var(--bg);
   background-color: #FAF7ED !important;
   color: var(--text);
@@ -14,6 +65,21 @@ body {
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
   font-size: 16px;
+  overflow-x: hidden !important;
+  width: 100%;
+  max-width: 100vw;
+  position: relative;
+}
+
+/* Prevenir overflow en todos los elementos */
+* {
+  max-width: 100%;
+}
+
+/* Excepciones para elementos que necesitan su ancho natural */
+img, video, iframe, svg {
+  max-width: 100%;
+  height: auto;
 }
 
 /* Improved typography */
@@ -48,11 +114,40 @@ p {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 @media (max-width: 768px) {
   .container {
-    padding: 1.5rem;
+    padding: 1rem;
+    max-width: 100%;
+    box-sizing: border-box;
+    width: 100%;
+  }
+  
+  /* Prevenir overflow horizontal en móvil */
+  body, html {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+    width: 100%;
+  }
+  
+  /* Asegurar que todos los elementos respeten el ancho */
+  section, div, header, nav, main, footer {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  img, video, iframe {
+    max-width: 100% !important;
+    height: auto;
+  }
+  
+  /* Padding y margin ajustados */
+  .container, .hero .container, .navbar .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 }
 
@@ -68,7 +163,8 @@ p {
   z-index: 1000;
   box-shadow: var(--shadow-sm);
   width: 100%;
-  overflow: visible;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 /* Ajustes para pantallas medianas y pequeñas */
@@ -81,7 +177,9 @@ p {
 .navbar {
   padding: 0;
   width: 100%;
-  overflow: visible;
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-y: visible;
 }
 
 .navbar .container {
@@ -89,9 +187,13 @@ p {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  overflow: visible;
+  overflow-x: hidden;
+  overflow-y: visible;
   padding-top: 0;
   padding-bottom: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .navbar-brand {
@@ -114,12 +216,28 @@ p {
   height: auto;
 }
 
-.navbar-brand > div {
+.navbar-brand > div,
+.navbar-brand-wrapper {
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: visible;
+  overflow: hidden;
+  width: 110px;
+  height: 110px;
+  border-radius: 12px;
+  background: transparent;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.navbar-brand img,
+.site-logo {
+  height: 90px;
+  width: auto;
+  object-fit: contain;
+  max-width: 100%;
+  transition: transform var(--transition-base);
 }
 
 .navbar-toggler {
@@ -252,24 +370,58 @@ p {
 
 /* Responsive: Mobile (max-width: 767px) */
 @media (max-width: 767px) {
+  /* Prevenir overflow horizontal - REGLAS ESTRICTAS */
+  html, body {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+    width: 100% !important;
+    position: relative;
+  }
+  
+  #root, .app, main, section, header, nav, footer, div {
+    max-width: 100vw !important;
+    width: 100% !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Todos los contenedores */
+  .container, [class*="container"] {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
   .navbar .container {
     height: auto;
-    padding-top: 0.75rem;
-    padding-bottom: 0.75rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    min-height: 60px;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
   }
   
   .navbar-brand {
     margin-right: 0;
   }
   
-  .navbar-brand > div {
-    width: 90px !important;
-    height: 90px !important;
+  .navbar-brand > div,
+  .navbar-brand-wrapper {
+    width: 60px !important;
+    height: 60px !important;
   }
   
-  .navbar-brand img {
-    max-height: 70px;
-    height: 70px !important;
+  .navbar-brand img,
+  .site-logo {
+    max-height: 50px;
+    height: 50px !important;
+    width: auto;
   }
   
   .navbar-toggler {
@@ -385,257 +537,434 @@ p {
 .hero {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(250, 247, 237, 0.98) 100%);
   border-bottom: 1px solid var(--gray-300);
-  padding-top: 0;
-  padding-bottom: 0;
+  padding-top: 4rem;
+  padding-bottom: 4rem;
   position: relative;
   overflow: hidden;
-  min-height: 75vh;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .hero .container {
-  height: 100%;
-  padding-top: 0;
-  padding-bottom: 0;
-  padding-left: 0;
-  padding-right: 0;
-  position: relative;
-  z-index: 2;
   max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Hero Text Section - Arriba */
+.hero-content-wrapper {
+  width: 100%;
+  margin-bottom: 3rem;
+}
+
+.hero-text-section {
+  text-align: center;
+  max-width: 800px;
   margin: 0 auto;
 }
 
-.hero-row {
-  align-items: stretch;
-  height: 100%;
-  margin-left: 0;
-  margin-right: 0;
-}
-
-/* Hero text column */
-.hero .col-lg-6 {
-  padding-left: 0;
-  padding-right: 0;
-}
-
-.hero .col-lg-6.left-col {
-  padding-left: 3rem;
-  padding-top: 4rem;
-  padding-bottom: 4rem;
-  padding-right: 3rem;
-  max-width: 520px;
-}
-
-.left-col h2.display-5 {
-  font-size: clamp(2rem, 5vw, 3.25rem);
-  font-weight: 800;
-  letter-spacing: -0.03em;
+.hero-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   margin-bottom: 1.5rem;
   line-height: 1.2;
   color: var(--text);
 }
 
-.left-col .lead {
-  font-size: clamp(1rem, 2vw, 1.25rem);
-  margin-bottom: 2rem;
+.hero-title-small {
+  font-size: clamp(1rem, 2.5vw, 1.5rem);
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-light);
+  margin-bottom: 0.5rem;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+}
+
+.hero-title-main {
+  font-size: clamp(3rem, 8vw, 5.5rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text);
+  font-family: 'Playfair Display', 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  line-height: 1.1;
+}
+
+.hero-description {
+  font-size: clamp(1.125rem, 2.5vw, 1.5rem);
+  margin-bottom: 2.5rem;
   color: var(--text-light);
   line-height: 1.7;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.left-col .mt-4 {
-  margin-top: 2rem !important;
+.hero-buttons {
+  display: flex;
   gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
-.left-col .btn-lg {
+.hero-buttons .btn-lg {
   padding: 1rem 2rem;
   font-size: 1.125rem;
   border-radius: var(--radius);
 }
 
-/* Full-bleed media - extends to right edge of viewport */
-.hero-media {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 50vw;
-  height: 100%;
-  display: block;
-  border-radius: 0;
-  overflow: hidden;
-  box-shadow: none;
-  z-index: 1;
-  border: none;
-  outline: none;
-}
-
-.hero-media .slide {
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-  transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1);
-  opacity: 0;
-}
-
-.hero-media .slide.active {
-  opacity: 1;
-}
-
-.hero-media .slide {
-  height: 100%;
+/* Hero Carousel Section - Abajo */
+.hero-carousel-wrapper {
   width: 100%;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: cover;
+  padding: 0 1rem;
+  margin-top: 3rem;
+  overflow: hidden;
+  max-width: 100%;
+  box-sizing: border-box;
+  position: relative;
 }
 
-/* Smooth fade on left edge - balanced and natural */
-.hero-media .slide {
-  -webkit-mask-image: linear-gradient(90deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.2) 10%, rgba(0,0,0,0.5) 22%, rgba(0,0,0,0.75) 30%, rgba(0,0,0,0.9) 35%, rgba(0,0,0,1) 38%, rgba(0,0,0,1) 100%);
-  mask-image: linear-gradient(90deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.2) 10%, rgba(0,0,0,0.5) 22%, rgba(0,0,0,0.75) 30%, rgba(0,0,0,0.9) 35%, rgba(0,0,0,1) 38%, rgba(0,0,0,1) 100%);
-  -webkit-mask-size: 100% 100%;
-  mask-size: 100% 100%;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-}
-
-/* Subtle overlay gradient for seamless blending */
-.hero-media .slide::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    90deg,
-    rgba(250, 247, 237, 0.4) 0%,
-    rgba(250, 247, 237, 0.25) 12%,
-    rgba(250, 247, 237, 0.15) 20%,
-    rgba(250, 247, 237, 0.08) 28%,
-    rgba(250, 247, 237, 0.03) 35%,
-    transparent 40%
-  );
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* Right column */
-.hero .col-lg-6.right-col {
-  min-height: 75vh;
+.hero-carousel {
+  position: relative;
+  max-width: 1000px;
+  margin: 0 auto;
   display: flex;
-  align-items: stretch;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+  max-width: 100%;
+}
+
+.carousel-images {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+  max-width: 100%;
+  height: 500px;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.carousel-image {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  will-change: transform, opacity;
+}
+
+.carousel-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  will-change: transform, opacity;
+}
+
+/* Imagen izquierda - más pequeña, centrada y MUY transparente */
+.carousel-image-left {
+  width: 25%;
+  height: 60%;
+  opacity: 0.1;
+  transform: scale(0.9);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  filter: none;
+}
+
+.carousel-image-left.active {
+  opacity: 0.15;
+  transform: scale(0.95);
+  filter: none;
+}
+
+/* Animación de desplazamiento para imagen izquierda - solo se desvanece */
+.carousel-images.transitioning .carousel-image-left {
+  opacity: 0.05;
+  transform: scale(0.85);
+  filter: none;
+}
+
+/* Imagen central - más grande y resaltada */
+.carousel-image-center {
+  width: 45%;
+  height: 100%;
+  opacity: 1;
+  transform: scale(1);
+  z-index: 2;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  filter: none;
+}
+
+.carousel-image-center.active {
+  opacity: 1;
+  transform: scale(1.02);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+  filter: none;
+}
+
+/* Animación de desplazamiento para imagen central - se desvanece ligeramente */
+.carousel-images.transitioning .carousel-image-center {
+  opacity: 0.7;
+  transform: scale(0.98);
+  filter: none;
+}
+
+/* Imagen derecha - más pequeña, centrada y MUY transparente */
+.carousel-image-right {
+  width: 25%;
+  height: 60%;
+  opacity: 0.1;
+  transform: scale(0.9);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+  filter: none;
+}
+
+.carousel-image-right.active {
+  opacity: 0.15;
+  transform: scale(0.95);
+  filter: none;
+}
+
+/* Animación de desplazamiento para imagen derecha - se hace más visible */
+.carousel-images.transitioning .carousel-image-right {
+  opacity: 0.3;
+  transform: scale(0.98);
+  filter: none;
+}
+
+/* Navegación del carrusel */
+.carousel-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid var(--matcha-500);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  z-index: 10;
+  color: var(--matcha-600);
+  box-shadow: var(--shadow-md);
+}
+
+.carousel-nav:hover {
+  background: var(--matcha-500);
+  color: #fff;
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: var(--shadow-lg);
+}
+
+.carousel-prev {
+  left: 10px;
+}
+
+.carousel-next {
+  right: 10px;
 }
 
 /* Responsive: Tablets (768px - 991px) - Hero */
 @media (max-width: 991px) and (min-width: 768px) {
   .hero {
-    min-height: auto;
     padding-top: 3rem;
     padding-bottom: 3rem;
   }
   
   .hero .container {
-    padding-left: 2rem;
-    padding-right: 2rem;
-  }
-  
-  .hero .col-lg-6.left-col {
-    padding-left: 2rem;
-    padding-right: 2rem;
-    padding-top: 0;
-    padding-bottom: 0;
-    max-width: 100%;
-    text-align: center;
-  }
-  
-  .hero-media {
-    position: relative;
-    left: 0 !important;
+    padding: 0 1rem;
     width: 100%;
-    max-width: none;
-    border-radius: var(--radius-lg);
-    margin-top: 2rem;
-    height: 400px;
+    max-width: 100%;
   }
   
-  .left-col h2.display-5 {
-    font-size: clamp(2rem, 5vw, 2.75rem);
-    margin-bottom: 1.25rem;
+  .hero-content-wrapper {
+    margin-bottom: 2.5rem;
   }
   
-  .left-col .lead {
-    font-size: 1.125rem;
+  .hero-title-small {
+    font-size: clamp(0.875rem, 2vw, 1.25rem);
+  }
+  
+  .hero-title-main {
+    font-size: clamp(2.5rem, 7vw, 4rem);
+  }
+  
+  .hero-description {
+    font-size: 1.25rem;
     margin-bottom: 2rem;
   }
   
-  .left-col .mt-4 {
-    justify-content: center;
+  .carousel-images {
+    height: 400px;
+    gap: 0.75rem;
+  }
+  
+  .carousel-image-left,
+  .carousel-image-right {
+    width: 22%;
+    height: 55%;
+  }
+  
+  .carousel-image-center {
+    width: 50%;
+  }
+  
+  .carousel-nav {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .carousel-prev {
+    left: 5px;
+  }
+  
+  .carousel-next {
+    right: 5px;
   }
 }
 
 /* Responsive: Mobile (max-width: 767px) - Hero */
 @media (max-width: 767px) {
   .hero {
-    min-height: auto;
     padding-top: 2rem;
     padding-bottom: 2rem;
   }
   
   .hero .container {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-  
-  .hero .col-lg-6.left-col {
-    padding-left: 1rem;
-    padding-right: 1rem;
-    padding-top: 0;
-    padding-bottom: 0;
+    padding: 0 1rem;
+    width: 100%;
     max-width: 100%;
-    min-width: unset;
-    text-align: center;
+    box-sizing: border-box;
   }
   
-  .hero-media {
-    position: relative !important;
-    left: 0 !important;
-    width: 100% !important;
-    max-width: none !important;
-    border-radius: var(--radius);
-    margin-top: 1.5rem;
-    height: 300px;
+  .hero-content-wrapper {
+    margin-bottom: 2rem;
   }
   
-  .left-col h2.display-5 {
-    font-size: clamp(1.75rem, 6vw, 2.25rem);
-    margin-bottom: 1rem;
+  .hero-title-small {
+    font-size: clamp(0.75rem, 2vw, 1rem);
+    margin-bottom: 0.4rem;
   }
   
-  .left-col .lead {
+  .hero-title-main {
+    font-size: clamp(2rem, 7vw, 3.5rem);
+  }
+  
+  .hero-description {
     font-size: 1rem;
     margin-bottom: 1.5rem;
-    max-width: 100%;
   }
   
-  .left-col .mt-4 {
+  .hero-buttons {
     flex-direction: column;
     width: 100%;
     gap: 0.75rem;
   }
   
-  .left-col .btn-lg {
+  .hero-buttons .btn-lg {
     width: 100%;
     padding: 0.875rem 1.5rem;
     font-size: 1rem;
   }
+  
+  .hero-carousel-wrapper {
+    padding: 0 0.5rem;
+    margin-top: 2rem;
+  }
+  
+  .carousel-images {
+    height: 300px;
+    gap: 0.5rem;
+  }
+  
+  .carousel-image-left,
+  .carousel-image-right {
+    width: 20%;
+    height: 50%;
+  }
+  
+  .carousel-image-center {
+    width: 55%;
+  }
+  
+  .carousel-nav {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .carousel-prev {
+    left: 5px;
+  }
+  
+  .carousel-next {
+    right: 5px;
+  }
+  
+  .carousel-nav svg {
+    width: 18px;
+    height: 18px;
+  }
 }
 
 @media (max-width: 576px) {
-  .hero-media {
-    height: 280px;
+  .hero {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
   }
   
-  .left-col h2.display-5 {
-    font-size: clamp(1.5rem, 7vw, 2rem);
+  .hero-title-small {
+    font-size: clamp(0.7rem, 2vw, 0.9rem);
+    margin-bottom: 0.3rem;
+  }
+  
+  .hero-title-main {
+    font-size: clamp(1.75rem, 7vw, 2.5rem);
+  }
+  
+  .carousel-images {
+    height: 250px;
+    gap: 0.4rem;
+  }
+  
+  .carousel-image-left,
+  .carousel-image-right {
+    width: 18%;
+    height: 45%;
+  }
+  
+  .carousel-image-center {
+    width: 60%;
+  }
+  
+  .carousel-nav {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .carousel-prev {
+    left: 5px;
+  }
+  
+  .carousel-next {
+    right: 5px;
+  }
+  
+  .carousel-nav svg {
+    width: 16px;
+    height: 16px;
   }
 }
 
@@ -1334,8 +1663,11 @@ a {
   }
   
   .container {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 }
 
@@ -1839,7 +2171,8 @@ img[src] {
     width: 56px;
     height: 56px;
     bottom: 1.5rem;
-    right: 1.5rem;
+    right: 1rem;
+    max-width: calc(100vw - 2rem);
   }
   
   .floating-cart-button svg {
@@ -1861,12 +2194,273 @@ img[src] {
     width: 52px;
     height: 52px;
     bottom: 1rem;
-    right: 1rem;
+    right: 0.75rem;
+    max-width: calc(100vw - 1.5rem);
   }
   
   .floating-cart-button svg {
     width: 22px;
     height: 22px;
+  }
+}
+
+/* ============================================
+   FLOATING MENU BUTTON
+   ============================================ */
+.floating-menu-button {
+  position: fixed;
+  bottom: 2rem;
+  left: 2rem;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--coffee-500);
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 20px rgba(111, 78, 55, 0.3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1059;
+  transition: all var(--transition-base);
+  padding: 0;
+}
+
+.floating-menu-button:hover {
+  background: var(--coffee-600);
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 6px 25px rgba(111, 78, 55, 0.4);
+}
+
+.floating-menu-button:active {
+  transform: translateY(-2px) scale(1.02);
+}
+
+.floating-menu-button.active {
+  background: var(--coffee-600);
+  transform: rotate(90deg);
+}
+
+.floating-menu-button svg {
+  width: 28px;
+  height: 28px;
+}
+
+/* Overlay para cerrar el menú */
+.floating-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 1058;
+  animation: fadeIn 0.3s ease;
+  backdrop-filter: blur(2px);
+}
+
+/* Menú desplegable */
+.floating-menu-dropdown {
+  position: fixed;
+  bottom: 5rem;
+  left: 2rem;
+  background: var(--bg-light);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  z-index: 1060;
+  min-width: 280px;
+  max-width: 320px;
+  max-height: 70vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: slideUpMenu 0.3s ease;
+  border: 1px solid var(--gray-200);
+}
+
+@keyframes slideUpMenu {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.floating-menu-header {
+  padding: 1.25rem;
+  border-bottom: 1px solid var(--gray-200);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, var(--matcha-50), var(--gray-50));
+}
+
+.floating-menu-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.floating-menu-close {
+  background: transparent;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+  transition: all var(--transition-base);
+  width: 32px;
+  height: 32px;
+}
+
+.floating-menu-close:hover {
+  background: var(--gray-200);
+  color: var(--coffee-600);
+}
+
+.floating-menu-list {
+  padding: 0.75rem;
+  overflow-y: auto;
+  max-height: calc(70vh - 80px);
+}
+
+.floating-menu-item {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: left;
+  transition: all var(--transition-base);
+  color: var(--text);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.floating-menu-item:hover {
+  background: var(--matcha-50);
+  color: var(--matcha-700);
+  transform: translateX(4px);
+}
+
+.floating-menu-item:active {
+  transform: translateX(2px);
+}
+
+.floating-menu-bullet {
+  width: 10px;
+  height: 10px;
+  background: var(--coffee-600);
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: block;
+}
+
+.floating-menu-text {
+  flex: 1;
+}
+
+/* Scrollbar personalizado para el menú */
+.floating-menu-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.floating-menu-list::-webkit-scrollbar-track {
+  background: var(--gray-100);
+  border-radius: var(--radius);
+}
+
+.floating-menu-list::-webkit-scrollbar-thumb {
+  background: var(--gray-300);
+  border-radius: var(--radius);
+}
+
+.floating-menu-list::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-400);
+}
+
+/* Responsive: Floating Menu Button */
+@media (max-width: 767px) {
+  .floating-menu-button {
+    width: 56px;
+    height: 56px;
+    bottom: 1.5rem;
+    left: 1rem;
+    max-width: calc(100vw - 2rem);
+  }
+  
+  .floating-menu-button svg {
+    width: 24px;
+    height: 24px;
+  }
+  
+  .floating-menu-dropdown {
+    bottom: 4.5rem;
+    left: 1.5rem;
+    right: 1.5rem;
+    min-width: auto;
+    max-width: none;
+  }
+  
+  .floating-menu-item {
+    padding: 0.75rem;
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .floating-menu-button {
+    width: 52px;
+    height: 52px;
+    bottom: 1rem;
+    left: 0.75rem;
+    max-width: calc(100vw - 1.5rem);
+  }
+  
+  .floating-menu-button svg {
+    width: 22px;
+    height: 22px;
+  }
+  
+  .floating-menu-dropdown {
+    bottom: 3.5rem;
+    left: 1rem;
+    right: 1rem;
+  }
+  
+  .floating-menu-header {
+    padding: 1rem;
+  }
+  
+  .floating-menu-header h3 {
+    font-size: 1.125rem;
+  }
+  
+  .floating-menu-list {
+    padding: 0.5rem;
+  }
+  
+  .floating-menu-item {
+    padding: 0.625rem;
+    font-size: 0.8125rem;
+  }
+  
+  .floating-menu-bullet {
+    width: 8px;
+    height: 8px;
   }
 }
 
@@ -1926,5 +2520,48 @@ img[src] {
   .checkout-modal {
     max-width: 100% !important;
     margin: 0.5rem;
+  }
+}
+
+/* ============================================
+   REGLA CRÍTICA: PREVENIR SCROLL HORIZONTAL EN MÓVIL
+   ============================================ */
+@media (max-width: 767px) {
+  /* Forzar que todo respete el ancho del viewport */
+  * {
+    max-width: 100vw !important;
+  }
+  
+  /* Excepciones para elementos inline de texto */
+  span:not([class]), a:not([class]), em, strong, small, b, i, u, mark, code {
+    max-width: none !important;
+  }
+  
+  /* Asegurar que contenedores principales no se salgan */
+  html, body, #root, .app {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+    width: 100% !important;
+    position: relative !important;
+  }
+  
+  /* Todos los contenedores con padding ajustado */
+  .container, [class*="container"], [class*="wrapper"], [class*="section"] {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Elementos con position absolute/fixed que no se salgan */
+  [class*="floating"], [class*="carousel"], [class*="nav"] {
+    max-width: calc(100vw - 2rem) !important;
+  }
+  
+  /* Imágenes y media */
+  img, video, iframe, svg, canvas {
+    max-width: 100% !important;
+    height: auto !important;
   }
 }
