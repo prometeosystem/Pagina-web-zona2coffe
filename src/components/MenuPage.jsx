@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useCart } from '../context/CartContext'
 import { useProductsByCategory } from '../hooks/useProducts'
 import FloatingCartButton from './FloatingCartButton'
@@ -23,6 +23,7 @@ const MenuItemCard = ({ item, imageIndex }) => {
   const [selectedSize, setSelectedSize] = useState(null)
   const [showSizeSelector, setShowSizeSelector] = useState(false)
   const [addingToCart, setAddingToCart] = useState(false)
+  const [showImageModal, setShowImageModal] = useState(false)
 
   const handleAddToCart = async () => {
     // Si ya está procesando, no hacer nada
@@ -70,10 +71,22 @@ const MenuItemCard = ({ item, imageIndex }) => {
     handleAddToCart()
   }
   
+  // Prevenir scroll del body cuando el modal está abierto
+  useEffect(() => {
+    if (showImageModal) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [showImageModal])
+  
   return (
     <div className="col-12 col-md-6 col-lg-4">
       <div className="card h-100 shadow-sm border-0 menu-page-card">
-        <div className="menu-item-image-wrapper">
+        <div className="menu-item-image-wrapper" style={{cursor: 'pointer'}} onClick={() => setShowImageModal(true)}>
           <img 
             src={placeholderImg} 
             className="card-img-top menu-item-image" 
@@ -93,6 +106,88 @@ const MenuItemCard = ({ item, imageIndex }) => {
             </svg>
           </div>
         </div>
+        
+        {/* Modal de imagen */}
+        {showImageModal && (
+          <div 
+            className="menu-image-modal-overlay"
+            onClick={(e) => {
+              if (e.target.classList.contains('menu-image-modal-overlay')) {
+                setShowImageModal(false)
+              }
+            }}
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0, 0, 0, 0.9)',
+              zIndex: 1100,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '1rem'
+            }}
+          >
+            <div 
+              className="menu-image-modal-content"
+              style={{
+                position: 'relative',
+                maxWidth: '90vw',
+                maxHeight: '90vh',
+                width: 'auto',
+                height: 'auto'
+              }}
+            >
+              <button
+                onClick={() => setShowImageModal(false)}
+                style={{
+                  position: 'absolute',
+                  top: '-40px',
+                  right: '0',
+                  background: 'rgba(255, 255, 255, 0.9)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '36px',
+                  height: '36px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  fontSize: '1.5rem',
+                  color: '#333',
+                  fontWeight: 'bold',
+                  zIndex: 1101,
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.background = '#fff'
+                  e.target.style.transform = 'scale(1.1)'
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = 'rgba(255, 255, 255, 0.9)'
+                  e.target.style.transform = 'scale(1)'
+                }}
+              >
+                ✕
+              </button>
+              <img 
+                src={placeholderImg} 
+                alt={item.name || item.nombre}
+                style={{
+                  maxWidth: '100%',
+                  maxHeight: '90vh',
+                  width: 'auto',
+                  height: 'auto',
+                  borderRadius: '8px',
+                  boxShadow: '0 10px 40px rgba(0, 0, 0, 0.5)',
+                  objectFit: 'contain'
+                }}
+              />
+            </div>
+          </div>
+        )}
         <div className="card-body">
           <div className="d-flex justify-content-between align-items-start mb-2">
             <h5 className="card-title mb-0" style={{fontWeight: 700, color: 'var(--text)', fontSize: '1.25rem'}}>{item.name || item.nombre}</h5>

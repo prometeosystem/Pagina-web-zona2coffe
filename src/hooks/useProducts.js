@@ -140,6 +140,9 @@ export const useProductsByCategory = () => {
       'bebidas-proteina': 'bebidasProteina',
       'bebidas-con-proteina': 'bebidasProteina',
       'bebidas_con_proteina': 'bebidasProteina',
+      'bebidas fitness': 'bebidasProteina',
+      'bebidas-fitness': 'bebidasProteina',
+      'bebidas_fitness': 'bebidasProteina',
       
       // Menú Dulce
       'menú dulce': 'menuDulce',
@@ -182,7 +185,22 @@ export const useProductsByCategory = () => {
 
     products.forEach(product => {
       // Normalizar la categoría: convertir a minúsculas y quitar espacios extra
-      const categoria = product.categoria?.toLowerCase().trim() || product.categoria_id?.toLowerCase().trim() || ''
+      let categoria = product.categoria?.toLowerCase().trim() || product.categoria_id?.toLowerCase().trim() || ''
+      
+      // Lógica especial para "Bebidas Fitness": diferenciar entre shots de energía y bebidas con proteína
+      if (categoria === 'bebidas fitness') {
+        const descripcion = (product.descripcion || product.desc || '').toLowerCase()
+        const nombre = (product.nombre || product.name || '').toLowerCase()
+        
+        // Si la descripción contiene "scoop" o el nombre contiene palabras clave de proteína
+        // entonces es una bebida con proteína, de lo contrario es un shot de energía
+        if (descripcion.includes('scoop') || descripcion.includes('proteína') || descripcion.includes('proteina')) {
+          categoria = 'bebidas con proteina' // Mapear a bebidas con proteína
+        } else {
+          categoria = 'shots de energia' // Mapear a shots de energía
+        }
+      }
+      
       const mappedCategory = categoryMap[categoria] || 'otros'
       
       if (organized[mappedCategory]) {

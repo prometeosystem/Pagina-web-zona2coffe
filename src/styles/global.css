@@ -1982,7 +1982,7 @@ img[src] {
   }
   
   .menu-item-image-wrapper {
-    height: 180px;
+    height: 220px;
   }
   
   .menu-item-image {
@@ -1992,7 +1992,7 @@ img[src] {
 
 @media (max-width: 576px) {
   .menu-item-image-wrapper {
-    height: 160px;
+    height: 200px;
   }
   
   .menu-item-image {
@@ -2725,18 +2725,6 @@ img[src] {
   aspect-ratio: 1 / 1 !important;
 }
 
-.swal2-icon.swal2-success .swal2-success-ring {
-  width: 100% !important;
-  height: 100% !important;
-  border-radius: 50% !important;
-  aspect-ratio: 1 / 1 !important;
-}
-
-.swal2-icon.swal2-success .swal2-success-circular-line-left,
-.swal2-icon.swal2-success .swal2-success-circular-line-right {
-  border-radius: 50% !important;
-}
-
 /* Para móviles - asegurar que el icono mantenga su forma */
 @media (max-width: 767px) {
   .swal2-icon.swal2-success {
@@ -2761,6 +2749,47 @@ img[src] {
   .checkout-modal {
     max-width: 100% !important;
     margin: 0.5rem;
+  }
+}
+
+/* ============================================
+   MENU IMAGE MODAL / LIGHTBOX
+   ============================================ */
+.menu-image-modal-overlay {
+  animation: fadeIn 0.3s ease;
+}
+
+.menu-image-modal-content {
+  animation: zoomIn 0.3s ease;
+}
+
+@keyframes zoomIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.menu-item-image-wrapper {
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.menu-item-image-wrapper:hover {
+  opacity: 0.9;
+}
+
+/* Responsive: Menu Image Modal */
+@media (max-width: 767px) {
+  .menu-image-modal-content button {
+    top: '-30px' !important;
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 1.25rem !important;
   }
 }
 
