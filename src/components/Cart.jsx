@@ -339,6 +339,58 @@ export default function Cart({ isOpen, onClose }) {
                 {formatPrice(getTotal())}
               </strong>
             </div>
+            
+            {/* Mensaje informativo sobre el pago */}
+            <div 
+              style={{
+                background: 'linear-gradient(135deg, rgba(45, 90, 39, 0.08) 0%, rgba(45, 90, 39, 0.04) 100%)',
+                border: '1.5px solid var(--matcha-200)',
+                borderRadius: 'var(--radius)',
+                padding: '1.125rem',
+                marginBottom: '1.25rem',
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '0.875rem'
+              }}
+            >
+              <div style={{
+                background: 'var(--matcha-500)',
+                borderRadius: '50%',
+                width: '28px',
+                height: '28px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                marginTop: '1px',
+                boxShadow: '0 2px 4px rgba(45, 90, 39, 0.2)'
+              }}>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M8 1.5C4.41 1.5 1.5 4.41 1.5 8S4.41 14.5 8 14.5 14.5 11.59 14.5 8 11.59 1.5 8 1.5zM8 13C5.24 13 3 10.76 3 8S5.24 3 8 3 13 5.24 13 8 10.76 13 8 13zM8.25 5.5H7.5V8.25L9.625 9.5l.5-.75L8.5 7.5V5.5H8.25z" fill="#fff"/>
+                </svg>
+              </div>
+              <div style={{ flex: 1 }}>
+                <p style={{
+                  margin: 0,
+                  fontSize: '0.9375rem',
+                  lineHeight: '1.6',
+                  color: 'var(--text)',
+                  fontWeight: 600,
+                  marginBottom: '0.375rem'
+                }}>
+                  Tu pedido comenzará a prepararse una vez que completes el pago
+                </p>
+                <p style={{
+                  margin: 0,
+                  fontSize: '0.8125rem',
+                  lineHeight: '1.5',
+                  color: 'var(--text-light)'
+                }}>
+                  Por favor, acércate a la barra para finalizar tu compra y se comenzará a preparar tu pedido.
+                </p>
+              </div>
+            </div>
+            
             <div className="d-flex gap-2">
               <button
                 onClick={clearCart}
