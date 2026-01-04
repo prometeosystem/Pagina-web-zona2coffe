@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useCart } from '../context/CartContext'
 import { useProductsByCategory } from '../hooks/useProducts'
 import FloatingCartButton from './FloatingCartButton'
@@ -14,7 +14,7 @@ const PLACEHOLDER_IMAGES = [
 ]
 
 // Componente para renderizar un item del menú
-const MenuItemCard = ({ item, imageIndex }) => {
+const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
   // Usar imagen del backend si existe, sino usar imagen por defecto
   const productId = item.id || item.id_producto || 0
   const backendImage = item.image || item.imagen || item.image_url || item.url_imagen || null
@@ -23,7 +23,8 @@ const MenuItemCard = ({ item, imageIndex }) => {
   const [selectedSize, setSelectedSize] = useState(null)
   const [showSizeSelector, setShowSizeSelector] = useState(false)
   const [addingToCart, setAddingToCart] = useState(false)
-  const [showImageModal, setShowImageModal] = useState(false)
+  
+  const imageExpanded = expandedImageId === productId
 
   const handleAddToCart = async () => {
     // Si ya está procesando, no hacer nada
@@ -71,25 +72,29 @@ const MenuItemCard = ({ item, imageIndex }) => {
     handleAddToCart()
   }
   
-  // Prevenir scroll del body cuando el modal está abierto
-  useEffect(() => {
-    if (showImageModal) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
-    }
-    return () => {
-      document.body.style.overflow = ''
-    }
-  }, [showImageModal])
-  
   return (
     <div className="col-12 col-md-6 col-lg-4">
-      <div className="card h-100 shadow-sm border-0 menu-page-card">
-        <div className="menu-item-image-wrapper" style={{cursor: 'pointer'}} onClick={() => setShowImageModal(true)}>
+        <div 
+          className="card h-100 shadow-sm border-0 menu-page-card"
+          style={{position: 'relative'}}
+          onClick={(e) => {
+            // Si se hace click fuera de la imagen (en la card pero no en la imagen), cerrar
+            if (imageExpanded && !e.target.closest('.menu-item-image-wrapper')) {
+              onImageExpand(null)
+            }
+          }}
+        >
+          <div 
+            className={`menu-item-image-wrapper ${imageExpanded ? 'menu-image-expanded-overlay' : ''}`}
+            style={{cursor: 'pointer'}}
+            onClick={(e) => {
+              e.stopPropagation()
+              onImageExpand(imageExpanded ? null : productId)
+            }}
+          >
           <img 
             src={placeholderImg} 
-            className="card-img-top menu-item-image" 
+            className={`card-img-top menu-item-image ${imageExpanded ? 'menu-image-expanded' : ''}`}
             alt={item.name || item.nombre}
             onError={(e) => {
               // Si la imagen falla, mostrar placeholder SVG
@@ -106,88 +111,6 @@ const MenuItemCard = ({ item, imageIndex }) => {
             </svg>
           </div>
         </div>
-        
-        {/* Modal de imagen */}
-        {showImageModal && (
-          <div 
-            className="menu-image-modal-overlay"
-            onClick={(e) => {
-              if (e.target.classList.contains('menu-image-modal-overlay')) {
-                setShowImageModal(false)
-              }
-            }}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: 'rgba(0, 0, 0, 0.9)',
-              zIndex: 1100,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '1rem'
-            }}
-          >
-            <div 
-              className="menu-image-modal-content"
-              style={{
-                position: 'relative',
-                maxWidth: '90vw',
-                maxHeight: '90vh',
-                width: 'auto',
-                height: 'auto'
-              }}
-            >
-              <button
-                onClick={() => setShowImageModal(false)}
-                style={{
-                  position: 'absolute',
-                  top: '-40px',
-                  right: '0',
-                  background: 'rgba(255, 255, 255, 0.9)',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: '36px',
-                  height: '36px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  fontSize: '1.5rem',
-                  color: '#333',
-                  fontWeight: 'bold',
-                  zIndex: 1101,
-                  transition: 'all 0.2s'
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.background = '#fff'
-                  e.target.style.transform = 'scale(1.1)'
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.background = 'rgba(255, 255, 255, 0.9)'
-                  e.target.style.transform = 'scale(1)'
-                }}
-              >
-                ✕
-              </button>
-              <img 
-                src={placeholderImg} 
-                alt={item.name || item.nombre}
-                style={{
-                  maxWidth: '100%',
-                  maxHeight: '90vh',
-                  width: 'auto',
-                  height: 'auto',
-                  borderRadius: '8px',
-                  boxShadow: '0 10px 40px rgba(0, 0, 0, 0.5)',
-                  objectFit: 'contain'
-                }}
-              />
-            </div>
-          </div>
-        )}
         <div className="card-body">
           <div className="d-flex justify-content-between align-items-start mb-2">
             <h5 className="card-title mb-0" style={{fontWeight: 700, color: 'var(--text)', fontSize: '1.25rem'}}>{item.name || item.nombre}</h5>
@@ -268,6 +191,7 @@ const MenuItemCard = ({ item, imageIndex }) => {
 
 export default function MenuPage({ onClose, onCartClick, isCartOpen }){
   const { productsByCategory, loading, error } = useProductsByCategory()
+  const [expandedImageId, setExpandedImageId] = useState(null)
   
   // Usar productos del backend si están disponibles y hay productos, sino usar fallback del JSON
   const hasBackendProducts = !loading && !error && Object.values(productsByCategory).some(cat => cat.length > 0)
@@ -339,7 +263,7 @@ export default function MenuPage({ onClose, onCartClick, isCartOpen }){
               </div>
             ) : menuData.bebidasCalientes && menuData.bebidasCalientes.length > 0 ? (
               menuData.bebidasCalientes.map((item, idx) => (
-                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx} />
+                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx} expandedImageId={expandedImageId} onImageExpand={setExpandedImageId} />
               ))
             ) : (
               !loading && <div className="col-12 text-center text-muted py-3">No hay productos disponibles</div>
@@ -357,7 +281,7 @@ export default function MenuPage({ onClose, onCartClick, isCartOpen }){
           <div className="row g-4">
             {menuData.bebidasFrias && menuData.bebidasFrias.length > 0 ? (
               menuData.bebidasFrias.map((item, idx) => (
-                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 10} />
+                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 10} expandedImageId={expandedImageId} onImageExpand={setExpandedImageId} />
               ))
             ) : null}
           </div>
@@ -373,7 +297,7 @@ export default function MenuPage({ onClose, onCartClick, isCartOpen }){
           <div className="row g-4">
             {menuData.shotsEnergia && menuData.shotsEnergia.length > 0 ? (
               menuData.shotsEnergia.map((item, idx) => (
-                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 20} />
+                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 20} expandedImageId={expandedImageId} onImageExpand={setExpandedImageId} />
               ))
             ) : null}
           </div>
@@ -389,7 +313,7 @@ export default function MenuPage({ onClose, onCartClick, isCartOpen }){
           <div className="row g-4">
             {menuData.bebidasProteina && menuData.bebidasProteina.length > 0 ? (
               menuData.bebidasProteina.map((item, idx) => (
-                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 30} />
+                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 30} expandedImageId={expandedImageId} onImageExpand={setExpandedImageId} />
               ))
             ) : null}
           </div>
@@ -408,7 +332,7 @@ export default function MenuPage({ onClose, onCartClick, isCartOpen }){
           <div className="row g-4">
             {menuData.menuDulce && menuData.menuDulce.length > 0 ? (
               menuData.menuDulce.map((item, idx) => (
-                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 40} />
+                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 40} expandedImageId={expandedImageId} onImageExpand={setExpandedImageId} />
               ))
             ) : null}
           </div>
@@ -427,7 +351,7 @@ export default function MenuPage({ onClose, onCartClick, isCartOpen }){
           <div className="row g-4">
             {menuData.menuSalado && menuData.menuSalado.length > 0 ? (
               menuData.menuSalado.map((item, idx) => (
-                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 50} />
+                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 50} expandedImageId={expandedImageId} onImageExpand={setExpandedImageId} />
               ))
             ) : null}
           </div>
@@ -446,7 +370,7 @@ export default function MenuPage({ onClose, onCartClick, isCartOpen }){
           <div className="row g-4">
             {menuData.ensaladas && menuData.ensaladas.length > 0 ? (
               menuData.ensaladas.map((item, idx) => (
-                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 60} />
+                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 60} expandedImageId={expandedImageId} onImageExpand={setExpandedImageId} />
               ))
             ) : null}
           </div>
@@ -462,7 +386,7 @@ export default function MenuPage({ onClose, onCartClick, isCartOpen }){
           <div className="row g-4">
             {menuData.otros && menuData.otros.length > 0 ? (
               menuData.otros.map((item, idx) => (
-                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 70} />
+                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 70} expandedImageId={expandedImageId} onImageExpand={setExpandedImageId} />
               ))
             ) : null}
           </div>
