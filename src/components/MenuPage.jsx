@@ -14,7 +14,7 @@ const PLACEHOLDER_IMAGES = [
 ]
 
 // Componente para renderizar un item del menú
-const MenuItemCard = ({ item, imageIndex }) => {
+const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
   // Usar imagen del backend si existe, sino usar imagen por defecto
   const productId = item.id || item.id_producto || 0
   const backendImage = item.image || item.imagen || item.image_url || item.url_imagen || null
@@ -23,6 +23,8 @@ const MenuItemCard = ({ item, imageIndex }) => {
   const [selectedSize, setSelectedSize] = useState(null)
   const [showSizeSelector, setShowSizeSelector] = useState(false)
   const [addingToCart, setAddingToCart] = useState(false)
+  
+  const imageExpanded = expandedImageId === productId
 
   const handleAddToCart = async () => {
     // Si ya está procesando, no hacer nada
@@ -72,11 +74,27 @@ const MenuItemCard = ({ item, imageIndex }) => {
   
   return (
     <div className="col-12 col-md-6 col-lg-4">
-      <div className="card h-100 shadow-sm border-0 menu-page-card">
-        <div className="menu-item-image-wrapper">
+        <div 
+          className="card h-100 shadow-sm border-0 menu-page-card"
+          style={{position: 'relative'}}
+          onClick={(e) => {
+            // Si se hace click fuera de la imagen (en la card pero no en la imagen), cerrar
+            if (imageExpanded && !e.target.closest('.menu-item-image-wrapper')) {
+              onImageExpand(null)
+            }
+          }}
+        >
+          <div 
+            className={`menu-item-image-wrapper ${imageExpanded ? 'menu-image-expanded-overlay' : ''}`}
+            style={{cursor: 'pointer'}}
+            onClick={(e) => {
+              e.stopPropagation()
+              onImageExpand(imageExpanded ? null : productId)
+            }}
+          >
           <img 
             src={placeholderImg} 
-            className="card-img-top menu-item-image" 
+            className={`card-img-top menu-item-image ${imageExpanded ? 'menu-image-expanded' : ''}`}
             alt={item.name || item.nombre}
             onError={(e) => {
               // Si la imagen falla, mostrar placeholder SVG
@@ -173,6 +191,7 @@ const MenuItemCard = ({ item, imageIndex }) => {
 
 export default function MenuPage({ onClose, onCartClick, isCartOpen }){
   const { productsByCategory, loading, error } = useProductsByCategory()
+  const [expandedImageId, setExpandedImageId] = useState(null)
   
   // Usar productos del backend si están disponibles y hay productos, sino usar fallback del JSON
   const hasBackendProducts = !loading && !error && Object.values(productsByCategory).some(cat => cat.length > 0)
@@ -244,7 +263,7 @@ export default function MenuPage({ onClose, onCartClick, isCartOpen }){
               </div>
             ) : menuData.bebidasCalientes && menuData.bebidasCalientes.length > 0 ? (
               menuData.bebidasCalientes.map((item, idx) => (
-                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx} />
+                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx} expandedImageId={expandedImageId} onImageExpand={setExpandedImageId} />
               ))
             ) : (
               !loading && <div className="col-12 text-center text-muted py-3">No hay productos disponibles</div>
@@ -262,7 +281,7 @@ export default function MenuPage({ onClose, onCartClick, isCartOpen }){
           <div className="row g-4">
             {menuData.bebidasFrias && menuData.bebidasFrias.length > 0 ? (
               menuData.bebidasFrias.map((item, idx) => (
-                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 10} />
+                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 10} expandedImageId={expandedImageId} onImageExpand={setExpandedImageId} />
               ))
             ) : null}
           </div>
@@ -278,7 +297,7 @@ export default function MenuPage({ onClose, onCartClick, isCartOpen }){
           <div className="row g-4">
             {menuData.shotsEnergia && menuData.shotsEnergia.length > 0 ? (
               menuData.shotsEnergia.map((item, idx) => (
-                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 20} />
+                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 20} expandedImageId={expandedImageId} onImageExpand={setExpandedImageId} />
               ))
             ) : null}
           </div>
@@ -294,7 +313,7 @@ export default function MenuPage({ onClose, onCartClick, isCartOpen }){
           <div className="row g-4">
             {menuData.bebidasProteina && menuData.bebidasProteina.length > 0 ? (
               menuData.bebidasProteina.map((item, idx) => (
-                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 30} />
+                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 30} expandedImageId={expandedImageId} onImageExpand={setExpandedImageId} />
               ))
             ) : null}
           </div>
@@ -313,7 +332,7 @@ export default function MenuPage({ onClose, onCartClick, isCartOpen }){
           <div className="row g-4">
             {menuData.menuDulce && menuData.menuDulce.length > 0 ? (
               menuData.menuDulce.map((item, idx) => (
-                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 40} />
+                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 40} expandedImageId={expandedImageId} onImageExpand={setExpandedImageId} />
               ))
             ) : null}
           </div>
@@ -332,7 +351,7 @@ export default function MenuPage({ onClose, onCartClick, isCartOpen }){
           <div className="row g-4">
             {menuData.menuSalado && menuData.menuSalado.length > 0 ? (
               menuData.menuSalado.map((item, idx) => (
-                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 50} />
+                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 50} expandedImageId={expandedImageId} onImageExpand={setExpandedImageId} />
               ))
             ) : null}
           </div>
@@ -351,7 +370,7 @@ export default function MenuPage({ onClose, onCartClick, isCartOpen }){
           <div className="row g-4">
             {menuData.ensaladas && menuData.ensaladas.length > 0 ? (
               menuData.ensaladas.map((item, idx) => (
-                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 60} />
+                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 60} expandedImageId={expandedImageId} onImageExpand={setExpandedImageId} />
               ))
             ) : null}
           </div>
@@ -367,7 +386,7 @@ export default function MenuPage({ onClose, onCartClick, isCartOpen }){
           <div className="row g-4">
             {menuData.otros && menuData.otros.length > 0 ? (
               menuData.otros.map((item, idx) => (
-                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 70} />
+                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 70} expandedImageId={expandedImageId} onImageExpand={setExpandedImageId} />
               ))
             ) : null}
           </div>
