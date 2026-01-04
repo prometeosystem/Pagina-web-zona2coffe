@@ -396,8 +396,8 @@ p {
   
   .navbar .container {
     height: auto;
-    padding-top: 0.25rem;
-    padding-bottom: 0.25rem;
+    padding-top: 0;
+    padding-bottom: 0;
     padding-left: 1rem;
     padding-right: 1rem;
     min-height: auto;
@@ -429,7 +429,8 @@ p {
   
   .navbar-toggler {
     border: 1px solid var(--gray-300);
-    padding: 0.25rem 0.5rem;
+    padding: 0.2rem 0.4rem;
+    font-size: 0.875rem;
   }
   
   .navbar-collapse {
@@ -1317,7 +1318,8 @@ p {
 
 .menu .card-img-top {
   height: 220px;
-  object-fit: cover;
+  object-fit: cover !important;
+  object-position: center !important;
   border-radius: 0;
 }
 
@@ -1385,6 +1387,7 @@ p {
   
   .menu .card-img-top {
     height: 210px;
+    object-position: center !important;
   }
   
   .menu .card-body {
@@ -1406,6 +1409,7 @@ p {
   
   .menu .card-img-top {
     height: 200px;
+    object-position: center !important;
   }
   
   .menu .card-body {
@@ -1424,6 +1428,7 @@ p {
 @media (max-width: 576px) {
   .menu .card-img-top {
     height: 180px;
+    object-position: center !important;
   }
   
   .menu .card-body {
@@ -1860,7 +1865,8 @@ img[src] {
 .menu-item-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: cover !important;
+  object-position: center !important;
   transition: transform var(--transition-slow);
 }
 
@@ -1920,6 +1926,10 @@ img[src] {
   .menu-item-image-wrapper {
     height: 200px;
   }
+  
+  .menu-item-image {
+    object-position: center !important;
+  }
 
   .menu-categories-nav {
     padding: 0.625rem 0;
@@ -1974,11 +1984,19 @@ img[src] {
   .menu-item-image-wrapper {
     height: 180px;
   }
+  
+  .menu-item-image {
+    object-position: center !important;
+  }
 }
 
 @media (max-width: 576px) {
   .menu-item-image-wrapper {
     height: 160px;
+  }
+  
+  .menu-item-image {
+    object-position: center !important;
   }
   
   .menu-page-card .card-body {
@@ -2697,6 +2715,45 @@ img[src] {
 
 .swal2-confirm:hover {
   background-color: var(--matcha-600) !important;
+}
+
+/* Asegurar que el icono de éxito se mantenga circular */
+.swal2-icon.swal2-success {
+  width: 5em !important;
+  height: 5em !important;
+  border-radius: 50% !important;
+  aspect-ratio: 1 / 1 !important;
+}
+
+.swal2-icon.swal2-success .swal2-success-ring {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 50% !important;
+  aspect-ratio: 1 / 1 !important;
+}
+
+.swal2-icon.swal2-success .swal2-success-circular-line-left,
+.swal2-icon.swal2-success .swal2-success-circular-line-right {
+  border-radius: 50% !important;
+}
+
+/* Para móviles - asegurar que el icono mantenga su forma */
+@media (max-width: 767px) {
+  .swal2-icon.swal2-success {
+    width: 4em !important;
+    height: 4em !important;
+    min-width: 4em !important;
+    min-height: 4em !important;
+    max-width: 4em !important;
+    max-height: 4em !important;
+    border-radius: 50% !important;
+    aspect-ratio: 1 / 1 !important;
+    flex-shrink: 0 !important;
+  }
+  
+  .swal2-popup {
+    padding: 1.25rem !important;
+  }
 }
 
 /* Responsive: Checkout Modal */
