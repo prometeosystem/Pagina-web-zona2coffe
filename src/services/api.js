@@ -15,11 +15,32 @@ export const getProducts = async () => {
     })
 
     if (!response.ok) {
-      throw new Error('Error al obtener los productos')
+      // Intentar obtener más información del error
+      let errorMessage = `Error al obtener los productos: ${response.status} ${response.statusText}`
+      try {
+        const errorData = await response.json()
+        errorMessage = errorData.detail || errorData.message || errorMessage
+      } catch (e) {
+        // Si no se puede parsear el JSON, usar el mensaje por defecto
+        const text = await response.text()
+        if (text) {
+          errorMessage = `${errorMessage} - ${text}`
+        }
+      }
+      throw new Error(errorMessage)
     }
 
     return await response.json()
   } catch (error) {
+    // Mejorar el mensaje de error para problemas de conexión
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      console.error('Error de conexión con el backend:', {
+        message: error.message,
+        url: `${API_BASE_URL}/productos/ver_productos`,
+        suggestion: 'Verifica que el backend esté corriendo en el puerto 8000'
+      })
+      throw new Error('No se pudo conectar con el servidor. Verifica que el backend esté corriendo.')
+    }
     console.error('Error obteniendo productos:', error)
     throw error
   }

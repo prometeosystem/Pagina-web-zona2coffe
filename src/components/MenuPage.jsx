@@ -3,23 +3,14 @@ import { useCart } from '../context/CartContext'
 import { useProductsByCategory } from '../hooks/useProducts'
 import FloatingCartButton from './FloatingCartButton'
 import FloatingMenuButton from './FloatingMenuButton'
-import fullMenuData from '../data/fullMenu.json' // Fallback si falla la carga del backend
-
-// Array de imágenes disponibles para usar como placeholders
-const PLACEHOLDER_IMAGES = [
-  '/assets/imagenUno.jpg', '/assets/imagenDos.jpg', '/assets/imagenTres.jpg', 
-  '/assets/imagenCuatro.jpg', '/assets/imagenCinco.jpg', '/assets/imagenSeis.jpg',
-  '/assets/imagenSiete.jpg', '/assets/imagenOcho.jpg', '/assets/imagenNueve.jpg', 
-  '/assets/imagenDiez.jpg'
-]
 
 // Componente para renderizar un item del menú
 const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
-  // Usar imagen del backend si existe, sino usar imagen por defecto
+  // Solo usar imagen del backend si existe (puede venir como imagen_url base64 o como URL del endpoint)
   const productId = item.id || item.id_producto || 0
   const backendImage = item.image || item.imagen || item.image_url || item.url_imagen || null
-  const placeholderImg = backendImage || PLACEHOLDER_IMAGES[(productId + imageIndex) % PLACEHOLDER_IMAGES.length]
   const { addToCart } = useCart()
+  const [imageError, setImageError] = useState(false)
   const [selectedSize, setSelectedSize] = useState(null)
   const [showSizeSelector, setShowSizeSelector] = useState(false)
   const [addingToCart, setAddingToCart] = useState(false)
@@ -84,33 +75,26 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
             }
           }}
         >
-          <div 
-            className={`menu-item-image-wrapper ${imageExpanded ? 'menu-image-expanded-overlay' : ''}`}
-            style={{cursor: 'pointer'}}
-            onClick={(e) => {
-              e.stopPropagation()
-              onImageExpand(imageExpanded ? null : productId)
-            }}
-          >
-          <img 
-            src={placeholderImg} 
-            className={`card-img-top menu-item-image ${imageExpanded ? 'menu-image-expanded' : ''}`}
-            alt={item.name || item.nombre}
-            onError={(e) => {
-              // Si la imagen falla, mostrar placeholder SVG
-              e.target.style.display = 'none'
-              const placeholder = e.target.nextElementSibling
-              if (placeholder) placeholder.style.display = 'flex'
-            }}
-          />
-          <div className="menu-item-placeholder" style={{display: 'none'}}>
-            <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect width="100" height="100" fill="#f1f5f1"/>
-              <path d="M50 35L40 45H45V65H55V45H60L50 35Z" fill="#2d5a27" opacity="0.3"/>
-              <circle cx="50" cy="50" r="20" stroke="#2d5a27" strokeWidth="2" fill="none" opacity="0.3"/>
-            </svg>
-          </div>
-        </div>
+          {backendImage && !imageError && (
+            <div 
+              className={`menu-item-image-wrapper ${imageExpanded ? 'menu-image-expanded-overlay' : ''}`}
+              style={{cursor: 'pointer'}}
+              onClick={(e) => {
+                e.stopPropagation()
+                onImageExpand(imageExpanded ? null : productId)
+              }}
+            >
+              <img 
+                src={backendImage} 
+                className={`card-img-top menu-item-image ${imageExpanded ? 'menu-image-expanded' : ''}`}
+                alt={item.name || item.nombre}
+                onError={() => {
+                  // Si la imagen falla al cargar, marcarla como error para ocultarla
+                  setImageError(true)
+                }}
+              />
+            </div>
+          )}
         <div className="card-body">
           <div className="d-flex justify-content-between align-items-start mb-2">
             <h5 className="card-title mb-0" style={{fontWeight: 700, color: 'var(--text)', fontSize: '1.25rem'}}>{item.name || item.nombre}</h5>
@@ -193,9 +177,8 @@ export default function MenuPage({ onClose, onCartClick, isCartOpen }){
   const { productsByCategory, loading, error } = useProductsByCategory()
   const [expandedImageId, setExpandedImageId] = useState(null)
   
-  // Usar productos del backend si están disponibles y hay productos, sino usar fallback del JSON
-  const hasBackendProducts = !loading && !error && Object.values(productsByCategory).some(cat => cat.length > 0)
-  const menuData = hasBackendProducts ? productsByCategory : fullMenuData
+  // Usar solo productos del backend
+  const menuData = productsByCategory
 
   const scrollToSection = (sectionId) => {
     const element = document.getElementById(sectionId)

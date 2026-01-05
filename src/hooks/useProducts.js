@@ -17,6 +17,12 @@ export const useProducts = () => {
         setError(null)
         const data = await getProducts()
         
+        // Validar que la respuesta sea un array
+        if (!Array.isArray(data)) {
+          console.error('La respuesta del backend no es un array:', data)
+          throw new Error('Formato de respuesta inválido del servidor')
+        }
+        
         // Transformar productos del backend al formato esperado
         // El backend ya filtra por activo=1, pero filtramos de nuevo por seguridad
         const transformedProducts = data
@@ -186,18 +192,44 @@ export const useProductsByCategory = () => {
     products.forEach(product => {
       // Normalizar la categoría: convertir a minúsculas y quitar espacios extra
       let categoria = product.categoria?.toLowerCase().trim() || product.categoria_id?.toLowerCase().trim() || ''
+      const nombre = (product.nombre || product.name || '').toLowerCase()
+      const descripcion = (product.descripcion || product.desc || '').toLowerCase()
+      
+      // Lógica especial para "runner_proteina": diferenciar entre shots de energía y bebidas con proteína
+      if (categoria === 'runner_proteina' || categoria === 'runner-proteina' || categoria === 'runner proteina') {
+        // Productos que son shots de energía (shots simples, sin scoop de proteína)
+        const shotsEnergiaKeywords = [
+          'sprint shot',
+          'long run americano',
+          'peak point macchiato',
+          'flat white run'
+        ]
+        
+        const isShotEnergia = shotsEnergiaKeywords.some(keyword => nombre.includes(keyword))
+        
+        if (isShotEnergia) {
+          categoria = 'shots_de_energia' // Mapear a shots de energía
+        } else {
+          categoria = 'bebidas_con_proteina' // Mapear a bebidas con proteína
+        }
+      }
       
       // Lógica especial para "Bebidas Fitness": diferenciar entre shots de energía y bebidas con proteína
-      if (categoria === 'bebidas fitness') {
-        const descripcion = (product.descripcion || product.desc || '').toLowerCase()
-        const nombre = (product.nombre || product.name || '').toLowerCase()
-        
+      if (categoria === 'bebidas fitness' || categoria === 'bebidas-fitness' || categoria === 'bebidas_fitness') {
         // Si la descripción contiene "scoop" o el nombre contiene palabras clave de proteína
         // entonces es una bebida con proteína, de lo contrario es un shot de energía
         if (descripcion.includes('scoop') || descripcion.includes('proteína') || descripcion.includes('proteina')) {
-          categoria = 'bebidas con proteina' // Mapear a bebidas con proteína
+          categoria = 'bebidas_con_proteina' // Mapear a bebidas con proteína
         } else {
-          categoria = 'shots de energia' // Mapear a shots de energía
+          categoria = 'shots_de_energia' // Mapear a shots de energía
+        }
+      }
+      
+      // Lógica especial para separar ensaladas del menú salado
+      if (categoria === 'menu_salado' || categoria === 'menu-salado' || categoria === 'menu salado') {
+        // Si el nombre es "Ensaladas" o contiene palabras clave de ensalada
+        if (nombre === 'ensaladas' || nombre.includes('ensalada') || nombre.includes('bowl')) {
+          categoria = 'ensaladas'
         }
       }
       
