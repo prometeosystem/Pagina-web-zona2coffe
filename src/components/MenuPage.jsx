@@ -256,10 +256,9 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
                         fontWeight: 700,
                         color: 'white',
                         backgroundColor: '#146C43',
-                        border: isSelected ? '3px solid #0d4d2a' : 'none',
+                        border: 'none',
                         transition: 'all 0.2s',
-                        cursor: 'pointer',
-                        opacity: isSelected ? 1 : 0.8
+                        cursor: 'pointer'
                       }}
                       onClick={() => handleSizeSelect(size)}
                     >
