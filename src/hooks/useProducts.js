@@ -139,6 +139,12 @@ export const useProductsByCategory = () => {
       'shots-energia': 'shotsEnergia',
       'shots-de-energia': 'shotsEnergia',
       'shots_de_energia': 'shotsEnergia',
+      'shot-energia': 'shotsEnergia',
+      'shot-de-energia': 'shotsEnergia',
+      'shot_de_energia': 'shotsEnergia',
+      'shot energia': 'shotsEnergia',
+      'shot de energia': 'shotsEnergia',
+      'shot de energía': 'shotsEnergia',
       
       // Bebidas con Proteína
       'bebidas con proteína': 'bebidasProteina',
@@ -199,6 +205,15 @@ export const useProductsByCategory = () => {
       if (categoria === 'runner_proteina' || categoria === 'runner-proteina' || categoria === 'runner proteina') {
         // Todos los productos con categoría runner_proteina van a la sección de bebidas con proteína
         categoria = 'bebidas_con_proteina'
+      }
+      
+      // Lógica especial para "shot-energia" y variantes: todos van a shots de energía
+      if (categoria === 'shot-energia' || categoria === 'shot-de-energia' || categoria === 'shot_de_energia' || 
+          categoria === 'shot energia' || categoria === 'shot de energia' || categoria === 'shot de energía' ||
+          categoria === 'shots-energia' || categoria === 'shots-de-energia' || categoria === 'shots_de_energia' ||
+          categoria === 'shots de energia' || categoria === 'shots de energía') {
+        // Todos los productos con categoría relacionada a shots de energía van a esa sección
+        categoria = 'shots_de_energia'
       }
       
       // Lógica especial para "Bebidas Fitness": diferenciar entre shots de energía y bebidas con proteína
