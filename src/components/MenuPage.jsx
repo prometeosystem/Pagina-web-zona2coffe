@@ -1,48 +1,187 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useCart } from '../context/CartContext'
 import { useProductsByCategory } from '../hooks/useProducts'
 import FloatingCartButton from './FloatingCartButton'
 import FloatingMenuButton from './FloatingMenuButton'
 
-// Componente para renderizar un item del menú
+// Función para extraer el nombre base del producto (sin tamaño)
+const getBaseName = (name) => {
+  if (!name) return ''
+  // Remover patrones como " (M)", " (G)", " (S)", etc.
+  return name.replace(/\s*\([MGS]\)\s*$/i, '').trim()
+}
+
+// Función para extraer el tamaño del nombre del producto
+const getSizeFromName = (name) => {
+  if (!name) return null
+  const match = name.match(/\(([MGS])\)$/i)
+  return match ? match[1].toUpperCase() : null
+}
+
+// Función para agrupar productos por nombre base
+const groupProductsByName = (products) => {
+  const grouped = new Map()
+  
+  products.forEach(product => {
+    const baseName = getBaseName(product.name || product.nombre)
+    const sizeFromName = getSizeFromName(product.name || product.nombre)
+    
+    // Verificar si el producto tiene tamaños en campos separados (size, size2)
+    const hasSizeFields = product.size || product.size2 || product.tamaño || product.tamaño2
+    
+    if (!grouped.has(baseName)) {
+      grouped.set(baseName, {
+        baseName: baseName,
+        sizes: {},
+        description: product.desc || product.descripcion || '',
+        image: product.image || product.imagen || product.image_url || product.url_imagen || null,
+        categoria: product.categoria || null,
+        id: product.id || product.id_producto || 0
+      })
+    }
+    
+    const group = grouped.get(baseName)
+    
+    // PRIORIDAD 1: Si el producto tiene tamaños en campos separados (size, size2)
+    // Esto es para productos que vienen del JSON local o backend con ambos tamaños en un solo objeto
+    if (hasSizeFields && !sizeFromName) {
+      // Agregar tamaño M si existe
+      if (product.size || product.tamaño) {
+        const price = typeof product.price === 'string' 
+          ? parseFloat(product.price.replace('$', '').replace(',', '').trim()) 
+          : parseFloat(product.price || product.precio || 0)
+        const sizeLabel = (product.size || product.tamaño).toUpperCase()
+        if (price > 0) {
+          group.sizes[sizeLabel] = {
+            id: product.id || product.id_producto || 0,
+            price: price,
+            priceFormatted: price % 1 === 0 ? price.toFixed(0) : price.toFixed(2),
+            originalProduct: product
+          }
+        }
+      }
+      
+      // Agregar tamaño G si existe
+      if (product.size2 || product.tamaño2) {
+        const price2 = typeof product.price2 === 'string'
+          ? parseFloat(product.price2.replace('$', '').replace(',', '').trim())
+          : parseFloat(product.price2 || product.precio2 || 0)
+        const size2Label = (product.size2 || product.tamaño2).toUpperCase()
+        if (price2 > 0) {
+          group.sizes[size2Label] = {
+            id: product.id || product.id_producto || 0,
+            price: price2,
+            priceFormatted: price2 % 1 === 0 ? price2.toFixed(0) : price2.toFixed(2),
+            originalProduct: product
+          }
+        }
+      }
+    } else if (sizeFromName) {
+      // PRIORIDAD 2: Si el producto tiene tamaño en el nombre (ej: "Americano (M)")
+      // Esto agrupa productos que vienen como entradas separadas del backend
+      const price = typeof product.price === 'string'
+        ? parseFloat(product.price.replace('$', '').replace(',', '').trim())
+        : parseFloat(product.price || product.precio || 0)
+      if (price > 0) {
+        group.sizes[sizeFromName] = {
+          id: product.id || product.id_producto || 0,
+          price: price,
+          priceFormatted: price % 1 === 0 ? price.toFixed(0) : price.toFixed(2),
+          originalProduct: product
+        }
+      }
+    } else {
+      // PRIORIDAD 3: Si no tiene tamaño, usar como producto único
+      const price = typeof product.price === 'string'
+        ? parseFloat(product.price.replace('$', '').replace(',', '').trim())
+        : parseFloat(product.price || product.precio || 0)
+      if (Object.keys(group.sizes).length === 0 && price > 0) {
+        // Si no hay tamaños, usar este como único producto
+        group.sizes['UNICO'] = {
+          id: product.id || product.id_producto || 0,
+          price: price,
+          priceFormatted: price % 1 === 0 ? price.toFixed(0) : price.toFixed(2),
+          originalProduct: product
+        }
+      }
+    }
+    
+    // Actualizar imagen si esta tiene una y la anterior no
+    if (!group.image && (product.image || product.imagen || product.image_url || product.url_imagen)) {
+      group.image = product.image || product.imagen || product.image_url || product.url_imagen
+    }
+    
+    // Actualizar descripción si la nueva es más completa
+    if (!group.description && (product.desc || product.descripcion)) {
+      group.description = product.desc || product.descripcion
+    }
+  })
+  
+  return Array.from(grouped.values())
+}
+
+// Componente para renderizar un item del menú (ahora agrupado)
 const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
-  // Solo usar imagen del backend si existe (puede venir como imagen_url base64 o como URL del endpoint)
-  const productId = item.id || item.id_producto || 0
-  const backendImage = item.image || item.imagen || item.image_url || item.url_imagen || null
+  // item ahora es un objeto agrupado con baseName, sizes, description, image
+  const productId = item.id || 0
+  const backendImage = item.image
   const { addToCart } = useCart()
   const [imageError, setImageError] = useState(false)
   const [selectedSize, setSelectedSize] = useState(null)
-  const [showSizeSelector, setShowSizeSelector] = useState(false)
   const [addingToCart, setAddingToCart] = useState(false)
   
   const imageExpanded = expandedImageId === productId
-
+  
+  // Obtener los tamaños disponibles, ordenados (M primero, luego G)
+  const sizes = Object.keys(item.sizes).sort((a, b) => {
+    const order = { 'M': 1, 'G': 2, 'S': 0, 'UNICO': 3 }
+    return (order[a] || 99) - (order[b] || 99)
+  })
+  const hasMultipleSizes = sizes.length > 1 && sizes[0] !== 'UNICO'
+  
+  // Si solo hay un tamaño y no es UNICO, seleccionarlo automáticamente
+  useEffect(() => {
+    if (!hasMultipleSizes && sizes.length === 1 && sizes[0] !== 'UNICO' && !selectedSize) {
+      setSelectedSize(sizes[0])
+    }
+  }, [sizes, hasMultipleSizes, selectedSize])
+  
+  const handleSizeSelect = (size) => {
+    if (hasMultipleSizes) {
+      setSelectedSize(selectedSize === size ? null : size)
+    }
+  }
+  
   const handleAddToCart = async () => {
-    // Si ya está procesando, no hacer nada
-    if (addingToCart) return
-
-    // Si el producto tiene tamaños, mostrar selector
-    if (item.size && !selectedSize) {
-      setShowSizeSelector(true)
+    // Si no hay tamaño seleccionado y hay múltiples tamaños, no hacer nada
+    if (hasMultipleSizes && !selectedSize) {
       return
     }
 
+    // Si ya está procesando, no hacer nada
+    if (addingToCart) return
+
+    // Usar el tamaño seleccionado o el único disponible
+    const sizeToUse = selectedSize || (sizes.length === 1 ? sizes[0] : null)
+    if (!sizeToUse) return
+
+    const sizeData = item.sizes[sizeToUse]
+    if (!sizeData) return
+
     // Si el precio es "00.00" o 0, no permitir agregar
-    const precio = parseFloat(item.price || item.precio || 0)
-    if (precio === 0 || item.price === "00.00") {
+    if (sizeData.price === 0 || sizeData.priceFormatted === "00.00") {
       alert('Por favor consulta el precio antes de agregar este producto')
       return
     }
 
     setAddingToCart(true)
     try {
-      const success = await addToCart(item, selectedSize || null, 1)
+      const success = await addToCart(sizeData.originalProduct, sizeToUse === 'UNICO' ? null : sizeToUse, 1)
       
       if (success) {
-        setShowSizeSelector(false)
-        setSelectedSize(null)
+        // No limpiar la selección para permitir agregar más del mismo tamaño
         // Mostrar feedback visual
-        const button = document.querySelector(`[data-item-id="${item.id || item.id_producto}"]`)
+        const button = document.querySelector(`[data-item-id="${productId}"]`)
         if (button) {
           button.classList.add('added-to-cart')
           setTimeout(() => {
@@ -55,12 +194,6 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
     } finally {
       setAddingToCart(false)
     }
-  }
-
-  const handleSizeSelect = (size) => {
-    setSelectedSize(size)
-    setShowSizeSelector(false)
-    handleAddToCart()
   }
   
   return (
@@ -97,76 +230,92 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
           )}
         <div className="card-body">
           <div className="d-flex justify-content-between align-items-start mb-2">
-            <h5 className="card-title mb-0" style={{fontWeight: 700, color: 'var(--text)', fontSize: '1.25rem'}}>{item.name || item.nombre}</h5>
+            <h5 className="card-title mb-0" style={{fontWeight: 700, color: 'var(--text)', fontSize: '1.25rem'}}>{item.baseName}</h5>
           </div>
-          <p className="text-muted small mb-3" style={{minHeight: '48px', lineHeight: '1.6'}}>{item.desc || item.descripcion}</p>
-          <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-            <div>
-              {item.size || item.tamaño ? (
-                <>
-                  <span className="badge menu-price-badge me-2">{item.size || item.tamaño} ${item.price || item.precio?.toFixed(2)}</span>
-                  {item.size2 && <span className="badge menu-price-badge">{item.size2} ${item.price2 || item.precio2?.toFixed(2)}</span>}
-                </>
-              ) : (
-                <span className="badge menu-price-badge">
-                  {item.price === "00.00" || parseFloat(item.price || item.precio || 0) === 0 ? "Consultar precio" : `$${item.price || item.precio?.toFixed(2)}`}
-                </span>
-              )}
-            </div>
-          </div>
+          <p className="text-muted small mb-3" style={{minHeight: '48px', lineHeight: '1.6'}}>{item.description}</p>
           
-          {/* Botón agregar al carrito */}
-          {item.price !== "00.00" && (
-            <div className="position-relative">
-              {showSizeSelector && item.size ? (
-                <div className="size-selector d-flex gap-2">
-                  <button
-                    className="btn btn-sm btn-outline-primary flex-fill"
-                    onClick={() => handleSizeSelect('M')}
-                    disabled={addingToCart}
-                  >
-                    {item.size} ${item.price}
-                  </button>
-                  {item.size2 && (
+          {/* Mostrar precios de ambos tamaños como opciones seleccionables */}
+          {hasMultipleSizes ? (
+            <div className="mb-3">
+              <p className="small text-muted mb-2" style={{fontWeight: 500}}>Selecciona el tamaño:</p>
+              <div className="d-flex gap-2 flex-wrap">
+                {sizes.map(size => {
+                  const sizeData = item.sizes[size]
+                  if (!sizeData || sizeData.price === 0) return null
+                  const isSelected = selectedSize === size
+                  return (
                     <button
-                      className="btn btn-sm btn-outline-primary flex-fill"
-                      onClick={() => handleSizeSelect('G')}
-                      disabled={addingToCart}
+                      key={size}
+                      type="button"
+                      className={`btn ${isSelected ? 'btn-success' : 'btn-outline-success'}`}
+                      style={{
+                        flex: '1 1 auto',
+                        minWidth: '80px',
+                        fontSize: '0.9rem',
+                        fontWeight: isSelected ? 600 : 400,
+                        transition: 'all 0.2s',
+                        borderWidth: isSelected ? '2px' : '1px'
+                      }}
+                      onClick={() => handleSizeSelect(size)}
                     >
-                      {item.size2} ${item.price2}
+                      <div>
+                        <div style={{fontSize: '0.75rem', opacity: 0.9}}>{size}</div>
+                        <div style={{fontSize: '1rem'}}>
+                          ${sizeData.priceFormatted || sizeData.price}
+                        </div>
+                      </div>
                     </button>
-                  )}
-                  <button
-                    className="btn btn-sm btn-outline-secondary"
-                    onClick={() => setShowSizeSelector(false)}
+                  )
+                })}
+              </div>
+            </div>
+          ) : (
+            // Si solo hay un tamaño, mostrar el precio como badge
+            <div className="mb-3">
+              {sizes.map(size => {
+                const sizeData = item.sizes[size]
+                if (!sizeData || sizeData.price === 0) return null
+                return (
+                  <span 
+                    key={size}
+                    className="badge menu-price-badge bg-success"
+                    style={{fontSize: '1rem', padding: '0.5rem 1rem'}}
                   >
-                    ✕
-                  </button>
-                </div>
-              ) : (
-                <button
-                  data-item-id={item.id || item.id_producto}
-                  className="btn btn-add-to-cart w-100"
-                  onClick={handleAddToCart}
-                  disabled={addingToCart}
-                >
-                  {addingToCart ? (
-                    <>
-                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                      Agregando...
-                    </>
-                  ) : (
-                    <>
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style={{marginRight: '8px'}}>
-                        <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l1.313 7h8.17l1.313-7H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" fill="currentColor"/>
-                      </svg>
-                      Agregar al carrito
-                    </>
-                  )}
-                </button>
-              )}
+                    {size !== 'UNICO' ? `${size} ` : ''}${sizeData.priceFormatted ? `$${sizeData.priceFormatted}` : `$${sizeData.price}`}
+                  </span>
+                )
+              })}
             </div>
           )}
+          
+          {/* Botón único de agregar al carrito */}
+          <button
+            data-item-id={productId}
+            className={`btn btn-add-to-cart w-100 ${selectedSize || !hasMultipleSizes ? 'btn-success' : 'btn-secondary'}`}
+            onClick={handleAddToCart}
+            disabled={addingToCart || (hasMultipleSizes && !selectedSize)}
+            style={{
+              transition: 'all 0.2s',
+              opacity: (hasMultipleSizes && !selectedSize) ? 0.5 : 1,
+              cursor: (hasMultipleSizes && !selectedSize) ? 'not-allowed' : 'pointer'
+            }}
+          >
+            {addingToCart ? (
+              <>
+                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Agregando...
+              </>
+            ) : (
+              <>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style={{marginRight: '8px'}}>
+                  <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l1.313 7h8.17l1.313-7H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" fill="currentColor"/>
+                </svg>
+                {hasMultipleSizes && !selectedSize 
+                  ? 'Selecciona un tamaño' 
+                  : `Agregar ${selectedSize && hasMultipleSizes ? `(${selectedSize})` : ''} al carrito`}
+              </>
+            )}
+          </button>
         </div>
       </div>
     </div>
@@ -245,8 +394,8 @@ export default function MenuPage({ onClose, onCartClick, isCartOpen }){
                 </div>
               </div>
             ) : menuData.bebidasCalientes && menuData.bebidasCalientes.length > 0 ? (
-              menuData.bebidasCalientes.map((item, idx) => (
-                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx} expandedImageId={expandedImageId} onImageExpand={setExpandedImageId} />
+              groupProductsByName(menuData.bebidasCalientes).map((item, idx) => (
+                <MenuItemCard key={`${item.baseName}-${idx}`} item={item} imageIndex={idx} expandedImageId={expandedImageId} onImageExpand={setExpandedImageId} />
               ))
             ) : (
               !loading && <div className="col-12 text-center text-muted py-3">No hay productos disponibles</div>
@@ -263,8 +412,8 @@ export default function MenuPage({ onClose, onCartClick, isCartOpen }){
           </div>
           <div className="row g-4">
             {menuData.bebidasFrias && menuData.bebidasFrias.length > 0 ? (
-              menuData.bebidasFrias.map((item, idx) => (
-                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 10} expandedImageId={expandedImageId} onImageExpand={setExpandedImageId} />
+              groupProductsByName(menuData.bebidasFrias).map((item, idx) => (
+                <MenuItemCard key={`${item.baseName}-${idx + 10}`} item={item} imageIndex={idx + 10} expandedImageId={expandedImageId} onImageExpand={setExpandedImageId} />
               ))
             ) : null}
           </div>
@@ -279,8 +428,8 @@ export default function MenuPage({ onClose, onCartClick, isCartOpen }){
           </div>
           <div className="row g-4">
             {menuData.shotsEnergia && menuData.shotsEnergia.length > 0 ? (
-              menuData.shotsEnergia.map((item, idx) => (
-                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 20} expandedImageId={expandedImageId} onImageExpand={setExpandedImageId} />
+              groupProductsByName(menuData.shotsEnergia).map((item, idx) => (
+                <MenuItemCard key={`${item.baseName}-${idx + 20}`} item={item} imageIndex={idx + 20} expandedImageId={expandedImageId} onImageExpand={setExpandedImageId} />
               ))
             ) : null}
           </div>
@@ -295,8 +444,8 @@ export default function MenuPage({ onClose, onCartClick, isCartOpen }){
           </div>
           <div className="row g-4">
             {menuData.bebidasProteina && menuData.bebidasProteina.length > 0 ? (
-              menuData.bebidasProteina.map((item, idx) => (
-                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 30} expandedImageId={expandedImageId} onImageExpand={setExpandedImageId} />
+              groupProductsByName(menuData.bebidasProteina).map((item, idx) => (
+                <MenuItemCard key={`${item.baseName}-${idx + 30}`} item={item} imageIndex={idx + 30} expandedImageId={expandedImageId} onImageExpand={setExpandedImageId} />
               ))
             ) : null}
           </div>
@@ -314,8 +463,8 @@ export default function MenuPage({ onClose, onCartClick, isCartOpen }){
           </p>
           <div className="row g-4">
             {menuData.menuDulce && menuData.menuDulce.length > 0 ? (
-              menuData.menuDulce.map((item, idx) => (
-                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 40} expandedImageId={expandedImageId} onImageExpand={setExpandedImageId} />
+              groupProductsByName(menuData.menuDulce).map((item, idx) => (
+                <MenuItemCard key={`${item.baseName}-${idx + 40}`} item={item} imageIndex={idx + 40} expandedImageId={expandedImageId} onImageExpand={setExpandedImageId} />
               ))
             ) : null}
           </div>
@@ -333,8 +482,8 @@ export default function MenuPage({ onClose, onCartClick, isCartOpen }){
           </p>
           <div className="row g-4">
             {menuData.menuSalado && menuData.menuSalado.length > 0 ? (
-              menuData.menuSalado.map((item, idx) => (
-                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 50} expandedImageId={expandedImageId} onImageExpand={setExpandedImageId} />
+              groupProductsByName(menuData.menuSalado).map((item, idx) => (
+                <MenuItemCard key={`${item.baseName}-${idx + 50}`} item={item} imageIndex={idx + 50} expandedImageId={expandedImageId} onImageExpand={setExpandedImageId} />
               ))
             ) : null}
           </div>
@@ -352,8 +501,8 @@ export default function MenuPage({ onClose, onCartClick, isCartOpen }){
           </p>
           <div className="row g-4">
             {menuData.ensaladas && menuData.ensaladas.length > 0 ? (
-              menuData.ensaladas.map((item, idx) => (
-                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 60} expandedImageId={expandedImageId} onImageExpand={setExpandedImageId} />
+              groupProductsByName(menuData.ensaladas).map((item, idx) => (
+                <MenuItemCard key={`${item.baseName}-${idx + 60}`} item={item} imageIndex={idx + 60} expandedImageId={expandedImageId} onImageExpand={setExpandedImageId} />
               ))
             ) : null}
           </div>
@@ -368,8 +517,8 @@ export default function MenuPage({ onClose, onCartClick, isCartOpen }){
           </div>
           <div className="row g-4">
             {menuData.otros && menuData.otros.length > 0 ? (
-              menuData.otros.map((item, idx) => (
-                <MenuItemCard key={item.id || item.id_producto} item={item} imageIndex={idx + 70} expandedImageId={expandedImageId} onImageExpand={setExpandedImageId} />
+              groupProductsByName(menuData.otros).map((item, idx) => (
+                <MenuItemCard key={`${item.baseName}-${idx + 70}`} item={item} imageIndex={idx + 70} expandedImageId={expandedImageId} onImageExpand={setExpandedImageId} />
               ))
             ) : null}
           </div>

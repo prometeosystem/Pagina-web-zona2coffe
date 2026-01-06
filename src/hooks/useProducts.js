@@ -195,23 +195,10 @@ export const useProductsByCategory = () => {
       const nombre = (product.nombre || product.name || '').toLowerCase()
       const descripcion = (product.descripcion || product.desc || '').toLowerCase()
       
-      // Lógica especial para "runner_proteina": diferenciar entre shots de energía y bebidas con proteína
+      // Lógica especial para "runner_proteina": todos van a bebidas con proteína
       if (categoria === 'runner_proteina' || categoria === 'runner-proteina' || categoria === 'runner proteina') {
-        // Productos que son shots de energía (shots simples, sin scoop de proteína)
-        const shotsEnergiaKeywords = [
-          'sprint shot',
-          'long run americano',
-          'peak point macchiato',
-          'flat white run'
-        ]
-        
-        const isShotEnergia = shotsEnergiaKeywords.some(keyword => nombre.includes(keyword))
-        
-        if (isShotEnergia) {
-          categoria = 'shots_de_energia' // Mapear a shots de energía
-        } else {
-          categoria = 'bebidas_con_proteina' // Mapear a bebidas con proteína
-        }
+        // Todos los productos con categoría runner_proteina van a la sección de bebidas con proteína
+        categoria = 'bebidas_con_proteina'
       }
       
       // Lógica especial para "Bebidas Fitness": diferenciar entre shots de energía y bebidas con proteína
