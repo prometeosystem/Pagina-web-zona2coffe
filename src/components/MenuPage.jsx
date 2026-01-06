@@ -130,6 +130,7 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
   const [selectedSize, setSelectedSize] = useState(null)
   const [addingToCart, setAddingToCart] = useState(false)
   const [tipoPreparacion, setTipoPreparacion] = useState(null) // 'heladas' o 'frapeadas'
+  const [precioUnicoSeleccionado, setPrecioUnicoSeleccionado] = useState(false) // Para productos con un solo precio
   
   const imageExpanded = expandedImageId === productId
   
@@ -167,6 +168,14 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
       if (isBebidaFria && newSize !== selectedSize) {
         setTipoPreparacion(null)
       }
+    }
+  }
+  
+  const handlePrecioUnicoSelect = () => {
+    setPrecioUnicoSeleccionado(true)
+    // Si es bebida fría, resetear tipo de preparación al seleccionar precio
+    if (isBebidaFria) {
+      setTipoPreparacion(null)
     }
   }
   
@@ -208,9 +217,12 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
       )
       
       if (success) {
-        // Limpiar la selección de tipo de preparación después de agregar
+        // Limpiar las selecciones después de agregar
         if (isBebidaFria) {
           setTipoPreparacion(null)
+        }
+        if (!hasMultipleSizes) {
+          setPrecioUnicoSeleccionado(false)
         }
         // No limpiar la selección de tamaño para permitir agregar más del mismo tamaño
         // Mostrar feedback visual
@@ -318,16 +330,18 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
                     <button
                       key={size}
                       type="button"
+                      onClick={handlePrecioUnicoSelect}
                       className="btn"
                       style={{
                         height: '48px',
                         fontSize: '1rem',
                         fontWeight: 700,
                         color: 'white',
-                        backgroundColor: '#146C43',
-                        border: 'none',
+                        backgroundColor: precioUnicoSeleccionado ? '#0d5a2f' : '#146C43',
+                        border: precioUnicoSeleccionado ? '2px solid #0a4a26' : 'none',
                         padding: '0.5rem 1rem',
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
                       }}
                     >
                       ${sizeData.priceFormatted || sizeData.price}
@@ -338,8 +352,8 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
             </div>
           )}
           
-          {/* Selector de tipo de preparación para bebidas frías (solo se muestra cuando hay un tamaño seleccionado) */}
-          {isBebidaFria && (selectedSize || (!hasMultipleSizes && sizes.length > 0)) && (
+          {/* Selector de tipo de preparación para bebidas frías (solo se muestra cuando hay un tamaño/precio seleccionado) */}
+          {isBebidaFria && (selectedSize || (precioUnicoSeleccionado && !hasMultipleSizes)) && (
             <div className="mb-3">
               <p className="small text-muted mb-2" style={{fontWeight: 500}}>Tipo de preparación:</p>
               <div className="d-flex gap-2 flex-wrap">
@@ -382,11 +396,11 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
             data-item-id={productId}
             className={`btn btn-add-to-cart w-100 ${selectedSize || !hasMultipleSizes ? 'btn-success' : 'btn-secondary'}`}
             onClick={handleAddToCart}
-            disabled={addingToCart || (hasMultipleSizes && !selectedSize) || (isBebidaFria && !tipoPreparacion)}
+            disabled={addingToCart || (hasMultipleSizes && !selectedSize) || (!hasMultipleSizes && !precioUnicoSeleccionado) || (isBebidaFria && !tipoPreparacion)}
             style={{
               transition: 'all 0.2s',
-              opacity: (hasMultipleSizes && !selectedSize) || (isBebidaFria && !tipoPreparacion) ? 0.5 : 1,
-              cursor: (hasMultipleSizes && !selectedSize) || (isBebidaFria && !tipoPreparacion) ? 'not-allowed' : 'pointer'
+              opacity: (hasMultipleSizes && !selectedSize) || (!hasMultipleSizes && !precioUnicoSeleccionado) || (isBebidaFria && !tipoPreparacion) ? 0.5 : 1,
+              cursor: (hasMultipleSizes && !selectedSize) || (!hasMultipleSizes && !precioUnicoSeleccionado) || (isBebidaFria && !tipoPreparacion) ? 'not-allowed' : 'pointer'
             }}
           >
             {addingToCart ? (
@@ -401,6 +415,8 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
                 </svg>
                 {hasMultipleSizes && !selectedSize 
                   ? 'Selecciona un tamaño' 
+                  : !hasMultipleSizes && !precioUnicoSeleccionado
+                  ? 'Selecciona el precio'
                   : isBebidaFria && !tipoPreparacion
                   ? 'Selecciona tipo de preparación'
                   : `Agregar ${selectedSize && hasMultipleSizes ? `(${selectedSize})` : ''} al carrito`}
