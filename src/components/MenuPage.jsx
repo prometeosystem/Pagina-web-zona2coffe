@@ -247,14 +247,16 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
                     <button
                       key={size}
                       type="button"
-                      className="btn btn-success"
+                      className="btn"
                       style={{
                         flex: '1 1 auto',
                         minWidth: '80px',
-                        height: '44px',
+                        height: '48px',
                         fontSize: '1rem',
                         fontWeight: 700,
                         color: 'white',
+                        backgroundColor: '#146C43',
+                        border: 'none',
                         transition: 'all 0.2s',
                         opacity: isSelected ? 1 : 0.7
                       }}
@@ -272,29 +274,34 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
               </div>
             </div>
           ) : (
-            // Si solo hay un tamaño, mostrar el precio como botón con el mismo estilo
+            // Si solo hay un tamaño, mostrar el precio como botón con el mismo estilo y alineación
             <div className="mb-3">
-              {sizes.map(size => {
-                const sizeData = item.sizes[size]
-                if (!sizeData || sizeData.price === 0) return null
-                return (
-                  <button
-                    key={size}
-                    type="button"
-                    className="btn btn-success"
-                    style={{
-                      height: '44px',
-                      fontSize: '1rem',
-                      fontWeight: 700,
-                      color: 'white',
-                      padding: '0.5rem 1rem'
-                    }}
-                    disabled
-                  >
-                    ${sizeData.priceFormatted || sizeData.price}
-                  </button>
-                )
-              })}
+              <p className="small text-muted mb-2" style={{fontWeight: 500, visibility: 'hidden'}}>Selecciona el tamaño:</p>
+              <div className="d-flex gap-2 flex-wrap">
+                {sizes.map(size => {
+                  const sizeData = item.sizes[size]
+                  if (!sizeData || sizeData.price === 0) return null
+                  return (
+                    <button
+                      key={size}
+                      type="button"
+                      className="btn"
+                      style={{
+                        height: '48px',
+                        fontSize: '1rem',
+                        fontWeight: 700,
+                        color: 'white',
+                        backgroundColor: '#146C43',
+                        border: 'none',
+                        padding: '0.5rem 1rem'
+                      }}
+                      disabled
+                    >
+                      ${sizeData.priceFormatted || sizeData.price}
+                    </button>
+                  )
+                })}
+              </div>
             </div>
           )}
           
