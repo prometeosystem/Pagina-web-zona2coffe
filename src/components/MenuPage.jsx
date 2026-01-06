@@ -258,7 +258,8 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
                         backgroundColor: '#146C43',
                         border: 'none',
                         transition: 'all 0.2s',
-                        opacity: isSelected ? 1 : 0.7
+                        opacity: isSelected ? 1 : 0.6,
+                        cursor: 'pointer'
                       }}
                       onClick={() => handleSizeSelect(size)}
                     >
@@ -293,9 +294,9 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
                         color: 'white',
                         backgroundColor: '#146C43',
                         border: 'none',
-                        padding: '0.5rem 1rem'
+                        padding: '0.5rem 1rem',
+                        cursor: 'pointer'
                       }}
-                      disabled
                     >
                       ${sizeData.priceFormatted || sizeData.price}
                     </button>
