@@ -129,8 +129,21 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
   const [imageError, setImageError] = useState(false)
   const [selectedSize, setSelectedSize] = useState(null)
   const [addingToCart, setAddingToCart] = useState(false)
+  const [tipoPreparacion, setTipoPreparacion] = useState(null) // 'heladas' o 'frapeadas'
   
   const imageExpanded = expandedImageId === productId
+  
+  // Verificar si es bebida fría
+  const esBebidaFria = () => {
+    const categoria = item.categoria || ''
+    const categoriaLower = categoria.toLowerCase()
+    return categoriaLower.includes('bebidas frías') || 
+           categoriaLower.includes('bebidas frias') || 
+           categoriaLower.includes('bebidas-frias') ||
+           categoriaLower.includes('bebidas_frias')
+  }
+  
+  const isBebidaFria = esBebidaFria()
   
   // Obtener los tamaños disponibles, ordenados (M primero, luego G)
   const sizes = Object.keys(item.sizes).sort((a, b) => {
@@ -158,6 +171,12 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
       return
     }
 
+    // Si es bebida fría y no se ha seleccionado tipo de preparación, no hacer nada
+    if (isBebidaFria && !tipoPreparacion) {
+      alert('Por favor selecciona si quieres la bebida Helada o Frapeada')
+      return
+    }
+
     // Si ya está procesando, no hacer nada
     if (addingToCart) return
 
@@ -176,10 +195,19 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
 
     setAddingToCart(true)
     try {
-      const success = await addToCart(sizeData.originalProduct, sizeToUse === 'UNICO' ? null : sizeToUse, 1)
+      const success = await addToCart(
+        sizeData.originalProduct, 
+        sizeToUse === 'UNICO' ? null : sizeToUse, 
+        1,
+        isBebidaFria ? tipoPreparacion : null
+      )
       
       if (success) {
-        // No limpiar la selección para permitir agregar más del mismo tamaño
+        // Limpiar la selección de tipo de preparación después de agregar
+        if (isBebidaFria) {
+          setTipoPreparacion(null)
+        }
+        // No limpiar la selección de tamaño para permitir agregar más del mismo tamaño
         // Mostrar feedback visual
         const button = document.querySelector(`[data-item-id="${productId}"]`)
         if (button) {
@@ -305,16 +333,55 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
             </div>
           )}
           
+          {/* Selector de tipo de preparación para bebidas frías */}
+          {isBebidaFria && (
+            <div className="mb-3">
+              <p className="small text-muted mb-2" style={{fontWeight: 500}}>Tipo de preparación:</p>
+              <div className="d-flex gap-2 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => setTipoPreparacion('heladas')}
+                  className={`btn ${tipoPreparacion === 'heladas' ? 'btn-success' : 'btn-outline-success'}`}
+                  style={{
+                    flex: '1 1 auto',
+                    minWidth: '100px',
+                    fontSize: '0.9rem',
+                    fontWeight: tipoPreparacion === 'heladas' ? 600 : 400,
+                    transition: 'all 0.2s',
+                    borderWidth: tipoPreparacion === 'heladas' ? '2px' : '1px'
+                  }}
+                >
+                  Heladas
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTipoPreparacion('frapeadas')}
+                  className={`btn ${tipoPreparacion === 'frapeadas' ? 'btn-success' : 'btn-outline-success'}`}
+                  style={{
+                    flex: '1 1 auto',
+                    minWidth: '100px',
+                    fontSize: '0.9rem',
+                    fontWeight: tipoPreparacion === 'frapeadas' ? 600 : 400,
+                    transition: 'all 0.2s',
+                    borderWidth: tipoPreparacion === 'frapeadas' ? '2px' : '1px'
+                  }}
+                >
+                  Frapeadas
+                </button>
+              </div>
+            </div>
+          )}
+          
           {/* Botón único de agregar al carrito */}
           <button
             data-item-id={productId}
             className={`btn btn-add-to-cart w-100 ${selectedSize || !hasMultipleSizes ? 'btn-success' : 'btn-secondary'}`}
             onClick={handleAddToCart}
-            disabled={addingToCart || (hasMultipleSizes && !selectedSize)}
+            disabled={addingToCart || (hasMultipleSizes && !selectedSize) || (isBebidaFria && !tipoPreparacion)}
             style={{
               transition: 'all 0.2s',
-              opacity: (hasMultipleSizes && !selectedSize) ? 0.5 : 1,
-              cursor: (hasMultipleSizes && !selectedSize) ? 'not-allowed' : 'pointer'
+              opacity: (hasMultipleSizes && !selectedSize) || (isBebidaFria && !tipoPreparacion) ? 0.5 : 1,
+              cursor: (hasMultipleSizes && !selectedSize) || (isBebidaFria && !tipoPreparacion) ? 'not-allowed' : 'pointer'
             }}
           >
             {addingToCart ? (
@@ -329,6 +396,8 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
                 </svg>
                 {hasMultipleSizes && !selectedSize 
                   ? 'Selecciona un tamaño' 
+                  : isBebidaFria && !tipoPreparacion
+                  ? 'Selecciona tipo de preparación'
                   : `Agregar ${selectedSize && hasMultipleSizes ? `(${selectedSize})` : ''} al carrito`}
               </>
             )}

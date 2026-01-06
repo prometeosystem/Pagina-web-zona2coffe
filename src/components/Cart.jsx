@@ -23,9 +23,14 @@ export default function Cart({ isOpen, onClose }) {
     setShowCheckoutModal(false)
 
     try {
-      // Preparar los detalles con observaciones si hay comentarios o tipo de leche
+      // Preparar los detalles con observaciones si hay comentarios, tipo de leche o tipo de preparación
       const detalles = cartItems.map(item => {
         const observaciones = []
+        
+        // Agregar tipo de preparación si es bebida fría
+        if (item.tipoPreparacion) {
+          observaciones.push(`Preparación: ${item.tipoPreparacion === 'heladas' ? 'Heladas' : 'Frapeadas'}`)
+        }
         
         // Agregar tipo de leche si es bebida
         if (checkoutData.tipo_leche && checkoutData.tipo_leche === 'deslactosada') {
@@ -219,16 +224,26 @@ export default function Cart({ isOpen, onClose }) {
                       <h6 style={{ margin: 0, fontWeight: 600, fontSize: '1rem', color: 'var(--text)' }}>
                         {item.name}
                       </h6>
-                      {item.size && (
-                        <span className="badge" style={{ 
-                          background: 'var(--matcha-100)', 
-                          color: 'var(--matcha-700)',
-                          fontSize: '0.75rem',
-                          marginTop: '0.25rem'
-                        }}>
-                          Tamaño: {item.size}
-                        </span>
-                      )}
+                      <div className="d-flex flex-wrap gap-2" style={{ marginTop: '0.25rem' }}>
+                        {item.size && (
+                          <span className="badge" style={{ 
+                            background: 'var(--matcha-100)', 
+                            color: 'var(--matcha-700)',
+                            fontSize: '0.75rem'
+                          }}>
+                            Tamaño: {item.size}
+                          </span>
+                        )}
+                        {item.tipoPreparacion && (
+                          <span className="badge" style={{ 
+                            background: 'var(--coffee-100)', 
+                            color: 'var(--coffee-700)',
+                            fontSize: '0.75rem'
+                          }}>
+                            {item.tipoPreparacion === 'heladas' ? 'Heladas' : 'Frapeadas'}
+                          </span>
+                        )}
+                      </div>
                       <p style={{ 
                         margin: '0.5rem 0 0 0', 
                         fontSize: '0.875rem', 

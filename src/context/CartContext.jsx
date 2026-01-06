@@ -17,7 +17,7 @@ export const CartProvider = ({ children }) => {
   const [error, setError] = useState(null)
 
   // Agregar producto al carrito con validación en el backend
-  const addToCart = useCallback(async (product, selectedSize = null, quantity = 1) => {
+  const addToCart = useCallback(async (product, selectedSize = null, quantity = 1, tipoPreparacion = null) => {
     setIsLoading(true)
     setError(null)
 
@@ -61,20 +61,21 @@ export const CartProvider = ({ children }) => {
 
       // Crear item del carrito
       const cartItem = {
-        id: `${productId}-${size}-${Date.now()}`,
+        id: `${productId}-${size}-${tipoPreparacion || 'default'}-${Date.now()}`,
         productId: productId,
         name: product.nombre || product.name,
         description: product.descripcion || product.desc || '',
         price: parseFloat(price) || 0,
         size: size,
         quantity: quantity,
+        tipoPreparacion: tipoPreparacion, // 'heladas' o 'frapeadas' para bebidas frías
         originalProduct: product
       }
 
-      // Verificar si el producto ya está en el carrito (mismo ID y tamaño)
+      // Verificar si el producto ya está en el carrito (mismo ID, tamaño y tipo de preparación)
       setCartItems(prevItems => {
         const existingItemIndex = prevItems.findIndex(
-          item => item.productId === productId && item.size === size
+          item => item.productId === productId && item.size === size && item.tipoPreparacion === tipoPreparacion
         )
 
         if (existingItemIndex >= 0) {
