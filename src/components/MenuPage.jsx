@@ -247,20 +247,22 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
                     <button
                       key={size}
                       type="button"
-                      className={`btn ${isSelected ? 'btn-success' : 'btn-outline-success'}`}
+                      className="btn btn-success"
                       style={{
                         flex: '1 1 auto',
                         minWidth: '80px',
-                        fontSize: '0.9rem',
-                        fontWeight: isSelected ? 600 : 400,
+                        height: '44px',
+                        fontSize: '1rem',
+                        fontWeight: 700,
+                        color: 'white',
                         transition: 'all 0.2s',
-                        borderWidth: isSelected ? '2px' : '1px'
+                        opacity: isSelected ? 1 : 0.7
                       }}
                       onClick={() => handleSizeSelect(size)}
                     >
                       <div>
                         <div style={{fontSize: '0.75rem', opacity: 0.9}}>{size}</div>
-                        <div style={{fontSize: '1rem'}}>
+                        <div style={{fontSize: '1rem', fontWeight: 700}}>
                           ${sizeData.priceFormatted || sizeData.price}
                         </div>
                       </div>
@@ -270,19 +272,27 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
               </div>
             </div>
           ) : (
-            // Si solo hay un tamaño, mostrar el precio como badge
+            // Si solo hay un tamaño, mostrar el precio como botón con el mismo estilo
             <div className="mb-3">
               {sizes.map(size => {
                 const sizeData = item.sizes[size]
                 if (!sizeData || sizeData.price === 0) return null
                 return (
-                  <span 
+                  <button
                     key={size}
-                    className="badge menu-price-badge bg-success"
-                    style={{fontSize: '1rem', padding: '0.5rem 1rem'}}
+                    type="button"
+                    className="btn btn-success"
+                    style={{
+                      height: '44px',
+                      fontSize: '1rem',
+                      fontWeight: 700,
+                      color: 'white',
+                      padding: '0.5rem 1rem'
+                    }}
+                    disabled
                   >
-                    {size !== 'UNICO' ? `${size} ` : ''}${sizeData.priceFormatted ? `$${sizeData.priceFormatted}` : `$${sizeData.price}`}
-                  </span>
+                    ${sizeData.priceFormatted || sizeData.price}
+                  </button>
                 )
               })}
             </div>
