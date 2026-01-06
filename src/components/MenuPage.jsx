@@ -161,7 +161,12 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
   
   const handleSizeSelect = (size) => {
     if (hasMultipleSizes) {
-      setSelectedSize(selectedSize === size ? null : size)
+      const newSize = selectedSize === size ? null : size
+      setSelectedSize(newSize)
+      // Resetear tipo de preparación cuando se cambia el tamaño
+      if (isBebidaFria && newSize !== selectedSize) {
+        setTipoPreparacion(null)
+      }
     }
   }
   
@@ -333,8 +338,8 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
             </div>
           )}
           
-          {/* Selector de tipo de preparación para bebidas frías */}
-          {isBebidaFria && (
+          {/* Selector de tipo de preparación para bebidas frías (solo se muestra cuando hay un tamaño seleccionado) */}
+          {isBebidaFria && (selectedSize || (!hasMultipleSizes && sizes.length > 0)) && (
             <div className="mb-3">
               <p className="small text-muted mb-2" style={{fontWeight: 500}}>Tipo de preparación:</p>
               <div className="d-flex gap-2 flex-wrap">
