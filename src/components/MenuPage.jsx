@@ -153,12 +153,13 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
   })
   const hasMultipleSizes = sizes.length > 1 && sizes[0] !== 'UNICO'
   
-  // Si solo hay un tamaño y no es UNICO, seleccionarlo automáticamente
+  // Si solo hay un tamaño y no es UNICO, seleccionarlo automáticamente (solo si NO es bebida fría)
+  // Para bebidas frías con un solo precio, el usuario debe seleccionar el precio manualmente
   useEffect(() => {
-    if (!hasMultipleSizes && sizes.length === 1 && sizes[0] !== 'UNICO' && !selectedSize) {
+    if (!hasMultipleSizes && sizes.length === 1 && sizes[0] !== 'UNICO' && !selectedSize && !isBebidaFria) {
       setSelectedSize(sizes[0])
     }
-  }, [sizes, hasMultipleSizes, selectedSize])
+  }, [sizes, hasMultipleSizes, selectedSize, isBebidaFria])
   
   const handleSizeSelect = (size) => {
     if (hasMultipleSizes) {
@@ -185,6 +186,11 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
       return
     }
 
+    // Si no hay múltiples tamaños y no se ha seleccionado el precio único, no hacer nada
+    if (!hasMultipleSizes && !precioUnicoSeleccionado) {
+      return
+    }
+
     // Si es bebida fría y no se ha seleccionado tipo de preparación, no hacer nada
     if (isBebidaFria && !tipoPreparacion) {
       alert('Por favor selecciona si quieres la bebida Helada o Frapeada')
@@ -194,8 +200,10 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
     // Si ya está procesando, no hacer nada
     if (addingToCart) return
 
-    // Usar el tamaño seleccionado o el único disponible
-    const sizeToUse = selectedSize || (sizes.length === 1 ? sizes[0] : null)
+    // Usar el tamaño seleccionado o el único disponible (solo si está seleccionado)
+    const sizeToUse = hasMultipleSizes 
+      ? selectedSize 
+      : (precioUnicoSeleccionado && sizes.length === 1 ? sizes[0] : null)
     if (!sizeToUse) return
 
     const sizeData = item.sizes[sizeToUse]
@@ -353,7 +361,10 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
           )}
           
           {/* Selector de tipo de preparación para bebidas frías (solo se muestra cuando hay un tamaño/precio seleccionado) */}
-          {isBebidaFria && (selectedSize || (precioUnicoSeleccionado && !hasMultipleSizes)) && (
+          {isBebidaFria && (
+            (hasMultipleSizes && selectedSize) || 
+            (!hasMultipleSizes && precioUnicoSeleccionado)
+          ) && (
             <div className="mb-3">
               <p className="small text-muted mb-2" style={{fontWeight: 500}}>Tipo de preparación:</p>
               <div className="d-flex gap-2 flex-wrap">

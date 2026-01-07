@@ -9,23 +9,69 @@ export default function CheckoutModal({ isOpen, onClose, onConfirm, cartItems })
   const [tipoLeche, setTipoLeche] = useState('entera') // 'entera' o 'deslactosada'
   
   // Detectar si hay bebidas en el carrito
+  // Lista más completa de categorías y variantes de bebidas
   const categoriasBebidas = [
-    'Bebidas Calientes',
-    'Bebidas Frías',
     'bebidas calientes',
+    'bebidas-calientes',
+    'bebidas_calientes',
     'bebidas frías',
     'bebidas frias',
-    'Shots de Energía',
+    'bebidas-frías',
+    'bebidas-frias',
+    'bebidas_frias',
     'shots de energía',
-    'Bebidas con Proteína',
+    'shots de energia',
+    'shots-energia',
+    'shots-de-energia',
+    'shots_de_energia',
+    'shot-energia',
+    'shot-de-energia',
+    'shot_de_energia',
+    'shot energia',
+    'shot de energia',
+    'shot de energía',
     'bebidas con proteína',
-    'bebidas con proteina'
+    'bebidas con proteina',
+    'bebidas-proteina',
+    'bebidas-con-proteina',
+    'bebidas_con_proteina',
+    'bebidas fitness',
+    'bebidas-fitness',
+    'bebidas_fitness',
+    'runner_proteina',
+    'runner-proteina',
+    'runner proteina'
   ]
   
   const tieneBebidas = cartItems.some(item => {
-    const categoria = item.originalProduct?.categoria || item.categoria || ''
+    // Obtener categoría del item (puede venir de originalProduct o directamente del item)
+    const categoria = (item.originalProduct?.categoria || 
+                      item.originalProduct?.categoria_id || 
+                      item.categoria || 
+                      '').toLowerCase().trim()
+    
+    // Si no hay categoría, intentar detectar por el nombre o descripción
+    if (!categoria) {
+      const nombre = (item.name || item.nombre || '').toLowerCase()
+      const descripcion = (item.description || item.desc || item.descripcion || '').toLowerCase()
+      
+      // Palabras clave que indican que es una bebida
+      const palabrasClaveBebidas = [
+        'latte', 'cappuccino', 'americano', 'espresso', 'expresso',
+        'café', 'cafe', 'coffee', 'matcha', 'chai', 'chocolate',
+        'smoothie', 'frappé', 'frappe', 'iced', 'helado', 'frapeado',
+        'shot', 'energía', 'energia', 'proteína', 'proteina',
+        'leche', 'milk', 'bebida', 'drink', 'té', 'te', 'tonic'
+      ]
+      
+      return palabrasClaveBebidas.some(palabra => 
+        nombre.includes(palabra) || descripcion.includes(palabra)
+      )
+    }
+    
+    // Verificar si la categoría coincide con alguna categoría de bebidas
     return categoriasBebidas.some(cat => 
-      categoria.toLowerCase().includes(cat.toLowerCase())
+      categoria.includes(cat) || cat.includes(categoria)
     )
   })
   
@@ -371,5 +417,7 @@ export default function CheckoutModal({ isOpen, onClose, onConfirm, cartItems })
     </>
   )
 }
+
+
 
 

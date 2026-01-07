@@ -69,6 +69,7 @@ export const CartProvider = ({ children }) => {
         size: size,
         quantity: quantity,
         tipoPreparacion: tipoPreparacion, // 'heladas' o 'frapeadas' para bebidas frías
+        categoria: product.categoria || product.categoria_id || null, // Guardar categoría directamente
         originalProduct: product
       }
 
