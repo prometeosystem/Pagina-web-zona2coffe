@@ -70,6 +70,7 @@ export const CartProvider = ({ children }) => {
         quantity: quantity,
         tipoPreparacion: tipoPreparacion, // 'heladas' o 'frapeadas' para bebidas frías
         categoria: product.categoria || product.categoria_id || null, // Guardar categoría directamente
+        lleva_leche: Boolean(product.lleva_leche === true || product.lleva_leche === 1), // Guardar lleva_leche directamente
         originalProduct: product
       }
 

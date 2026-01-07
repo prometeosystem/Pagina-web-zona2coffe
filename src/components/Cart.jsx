@@ -33,8 +33,12 @@ export default function Cart({ isOpen, onClose }) {
         }
         
         // Agregar tipo de leche si es bebida
-        if (checkoutData.tipo_leche && checkoutData.tipo_leche === 'deslactosada') {
-          observaciones.push('Leche deslactosada')
+        if (checkoutData.tipo_leche) {
+          if (checkoutData.tipo_leche === 'deslactosada') {
+            observaciones.push('Leche deslactosada')
+          } else if (checkoutData.tipo_leche === 'almendras') {
+            observaciones.push('Leche de almendras')
+          }
         }
         
         // Agregar comentarios generales si existen

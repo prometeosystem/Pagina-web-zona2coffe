@@ -82,6 +82,10 @@ export const useProducts = () => {
               // Categoría del backend (ej: "Bebidas Calientes", "Alimentos")
               categoria: product.categoria || product.categoria_id || null,
               
+              // Lleva leche - el backend retorna lleva_leche como 1/0 o true/false
+              // Convertir a boolean explícitamente
+              lleva_leche: Boolean(product.lleva_leche === 1 || product.lleva_leche === true),
+              
               // Estado - el backend retorna activo como 1 o 0
               activo: product.activo === 1 || product.activo === true,
               
