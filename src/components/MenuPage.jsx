@@ -199,9 +199,9 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
       return
     }
 
-    // Si es bebida fría y no se ha seleccionado tipo de preparación, no hacer nada
-    if (isBebidaFria && !tipoPreparacion) {
-      alert('Por favor selecciona si quieres la bebida Helada o Frapeada')
+    // Si es bebida fría (pero no smoothie) y no se ha seleccionado tipo de preparación, no hacer nada
+    if (isBebidaFria && !isSmoothie && !tipoPreparacion) {
+      alert('Por favor selecciona si quieres la bebida Fría o Frapeada')
       return
     }
 
@@ -415,11 +415,11 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
             data-item-id={productId}
             className={`btn btn-add-to-cart w-100 ${selectedSize || !hasMultipleSizes ? 'btn-success' : 'btn-secondary'}`}
             onClick={handleAddToCart}
-            disabled={addingToCart || (hasMultipleSizes && !selectedSize) || (!hasMultipleSizes && !precioUnicoSeleccionado) || (isBebidaFria && !tipoPreparacion)}
+            disabled={addingToCart || (hasMultipleSizes && !selectedSize) || (!hasMultipleSizes && !precioUnicoSeleccionado) || (isBebidaFria && !isSmoothie && !tipoPreparacion)}
             style={{
               transition: 'all 0.2s',
-              opacity: (hasMultipleSizes && !selectedSize) || (!hasMultipleSizes && !precioUnicoSeleccionado) || (isBebidaFria && !tipoPreparacion) ? 0.5 : 1,
-              cursor: (hasMultipleSizes && !selectedSize) || (!hasMultipleSizes && !precioUnicoSeleccionado) || (isBebidaFria && !tipoPreparacion) ? 'not-allowed' : 'pointer'
+              opacity: (hasMultipleSizes && !selectedSize) || (!hasMultipleSizes && !precioUnicoSeleccionado) || (isBebidaFria && !isSmoothie && !tipoPreparacion) ? 0.5 : 1,
+              cursor: (hasMultipleSizes && !selectedSize) || (!hasMultipleSizes && !precioUnicoSeleccionado) || (isBebidaFria && !isSmoothie && !tipoPreparacion) ? 'not-allowed' : 'pointer'
             }}
           >
             {addingToCart ? (
@@ -436,7 +436,7 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
                   ? 'Selecciona un tamaño' 
                   : !hasMultipleSizes && !precioUnicoSeleccionado
                   ? 'Selecciona el precio'
-                  : isBebidaFria && !tipoPreparacion
+                  : isBebidaFria && !isSmoothie && !tipoPreparacion
                   ? 'Selecciona tipo de preparación'
                   : `Agregar ${selectedSize && hasMultipleSizes ? `(${selectedSize})` : ''} al carrito`}
               </>
