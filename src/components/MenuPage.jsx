@@ -146,6 +146,14 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
   
   const isBebidaFria = esBebidaFria()
   
+  // Verificar si es un smoothie (no debe mostrar opciones de preparación)
+  const esSmoothie = () => {
+    const nombre = item.baseName || ''
+    const nombreLower = nombre.toLowerCase()
+    return nombreLower.includes('smoothie') && (nombreLower.includes('mango') || nombreLower.includes('fresa'))
+  }
+  const isSmoothie = esSmoothie()
+  
   // Obtener los tamaños disponibles, ordenados (M primero, luego G)
   const sizes = Object.keys(item.sizes).sort((a, b) => {
     const order = { 'M': 1, 'G': 2, 'S': 0, 'UNICO': 3 }
@@ -221,7 +229,7 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
         sizeData.originalProduct, 
         sizeToUse === 'UNICO' ? null : sizeToUse, 
         1,
-        isBebidaFria ? tipoPreparacion : null
+        (isBebidaFria && !isSmoothie) ? tipoPreparacion : null
       )
       
       if (success) {
@@ -360,8 +368,8 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
             </div>
           )}
           
-          {/* Selector de tipo de preparación para bebidas frías (solo se muestra cuando hay un tamaño/precio seleccionado) */}
-          {isBebidaFria && (
+          {/* Selector de tipo de preparación para bebidas frías (solo se muestra cuando hay un tamaño/precio seleccionado, excepto para smoothies) */}
+          {isBebidaFria && !isSmoothie && (
             (hasMultipleSizes && selectedSize) || 
             (!hasMultipleSizes && precioUnicoSeleccionado)
           ) && (
