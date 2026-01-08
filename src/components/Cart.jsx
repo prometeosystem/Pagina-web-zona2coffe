@@ -65,8 +65,14 @@ export default function Cart({ isOpen, onClose }) {
       // Llamar al endpoint con el formato correcto
       const result = await createPreorden(preordenData, detalles)
 
+      // Debug: Log la respuesta del backend para ver qué está retornando
+      console.log('Respuesta del backend:', result)
+
       // El backend retorna: { message, id_preorden, total }
-      if (result && (result.id_preorden || result.id)) {
+      // Verificar si tiene id_preorden o id (por compatibilidad)
+      const idPreorden = result?.id_preorden || result?.id || result?.id_preorden_id
+      
+      if (result && idPreorden) {
         // Mostrar SweetAlert de éxito
         await Swal.fire({
           icon: 'success',
@@ -83,7 +89,14 @@ export default function Cart({ isOpen, onClose }) {
         clearCart()
         onClose()
       } else {
-        throw new Error('No se recibió un ID de pre-orden válido')
+        // Log más detallado del error
+        console.error('Respuesta inválida del backend:', {
+          result,
+          tieneIdPreorden: !!result?.id_preorden,
+          tieneId: !!result?.id,
+          keys: result ? Object.keys(result) : 'result es null/undefined'
+        })
+        throw new Error(`No se recibió un ID de pre-orden válido. Respuesta: ${JSON.stringify(result)}`)
       }
     } catch (error) {
       console.error('Error en checkout:', error)
