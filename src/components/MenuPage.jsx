@@ -381,7 +381,7 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
                     borderWidth: tipoPreparacion === 'heladas' ? '2px' : '1px'
                   }}
                 >
-                  Heladas
+                  Frío
                 </button>
                 <button
                   type="button"

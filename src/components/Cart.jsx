@@ -29,7 +29,7 @@ export default function Cart({ isOpen, onClose }) {
         
         // Agregar tipo de preparación si es bebida fría
         if (item.tipoPreparacion) {
-          observaciones.push(`Preparación: ${item.tipoPreparacion === 'heladas' ? 'Heladas' : 'Frapeadas'}`)
+          observaciones.push(`Preparación: ${item.tipoPreparacion === 'heladas' ? 'Frío' : 'Frapeadas'}`)
         }
         
         // Agregar tipo de leche si es bebida
@@ -257,7 +257,7 @@ export default function Cart({ isOpen, onClose }) {
                             color: 'var(--coffee-700)',
                             fontSize: '0.75rem'
                           }}>
-                            {item.tipoPreparacion === 'heladas' ? 'Heladas' : 'Frapeadas'}
+                            {item.tipoPreparacion === 'heladas' ? 'Frío' : 'Frapeadas'}
                           </span>
                         )}
                       </div>
