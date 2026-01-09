@@ -17,7 +17,7 @@ export const CartProvider = ({ children }) => {
   const [error, setError] = useState(null)
 
   // Agregar producto al carrito con validación en el backend
-  const addToCart = useCallback(async (product, selectedSize = null, quantity = 1, tipoPreparacion = null) => {
+  const addToCart = useCallback(async (product, selectedSize = null, quantity = 1, tipoPreparacion = null, tipoLeche = null, extras = []) => {
     setIsLoading(true)
     setError(null)
 
@@ -59,9 +59,13 @@ export const CartProvider = ({ children }) => {
         price = price.replace('$', '').replace(',', '').trim()
       }
 
+      // Crear un hash único para tipoLeche y extras para el ID
+      const tipoLecheHash = tipoLeche || 'none'
+      const extrasHash = extras && extras.length > 0 ? extras.sort().join(',') : 'none'
+
       // Crear item del carrito
       const cartItem = {
-        id: `${productId}-${size}-${tipoPreparacion || 'default'}-${Date.now()}`,
+        id: `${productId}-${size}-${tipoPreparacion || 'default'}-${tipoLecheHash}-${extrasHash}-${Date.now()}`,
         productId: productId,
         name: product.nombre || product.name,
         description: product.descripcion || product.desc || '',
@@ -69,15 +73,23 @@ export const CartProvider = ({ children }) => {
         size: size,
         quantity: quantity,
         tipoPreparacion: tipoPreparacion, // 'heladas' o 'frapeadas' para bebidas frías
+        tipoLeche: tipoLeche, // 'entera', 'deslactosada', 'almendras' o null
+        extras: extras && extras.length > 0 ? [...extras] : [], // Array de IDs de extras
         categoria: product.categoria || product.categoria_id || null, // Guardar categoría directamente
         lleva_leche: Boolean(product.lleva_leche === true || product.lleva_leche === 1), // Guardar lleva_leche directamente
+        lleva_extras: Boolean(product.lleva_extras === true || product.lleva_extras === 1), // Guardar lleva_extras directamente
         originalProduct: product
       }
 
-      // Verificar si el producto ya está en el carrito (mismo ID, tamaño y tipo de preparación)
+      // Verificar si el producto ya está en el carrito (mismo ID, tamaño, tipo de preparación, tipo de leche y extras)
       setCartItems(prevItems => {
         const existingItemIndex = prevItems.findIndex(
-          item => item.productId === productId && item.size === size && item.tipoPreparacion === tipoPreparacion
+          item => 
+            item.productId === productId && 
+            item.size === size && 
+            item.tipoPreparacion === tipoPreparacion &&
+            item.tipoLeche === tipoLeche &&
+            JSON.stringify(item.extras?.sort() || []) === JSON.stringify(extras?.sort() || [])
         )
 
         if (existingItemIndex >= 0) {
@@ -128,7 +140,7 @@ export const CartProvider = ({ children }) => {
     setError(null)
   }, [])
 
-  // Calcular total del carrito
+  // Calcular total del carrito (sin extras, los extras se calculan en el checkout modal)
   const getTotal = useCallback(() => {
     return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0)
   }, [cartItems])

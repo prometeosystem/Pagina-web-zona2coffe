@@ -1,61 +1,49 @@
 import React, { useState, useEffect } from 'react'
 import { useCart } from '../context/CartContext'
 
+// Opciones de extras disponibles
+const extrasOpciones = [
+  { id: 'tocino', nombre: 'Tocino', precio: 20 },
+  { id: 'huevo', nombre: 'Huevo', precio: 20 },
+  { id: 'jamon', nombre: 'Jamón', precio: 20 },
+  { id: 'chorizo', nombre: 'Chorizo', precio: 20 }
+]
+
 export default function CheckoutModal({ isOpen, onClose, onConfirm, cartItems }) {
   const { getTotal } = useCart()
   const [nombreCliente, setNombreCliente] = useState('')
   const [tipoServicio, setTipoServicio] = useState('comer-aqui') // 'comer-aqui' o 'para-llevar'
   const [comentarios, setComentarios] = useState('')
-  const [tipoLeche, setTipoLeche] = useState('entera') // 'entera', 'deslactosada' o 'almendras'
   
-  // Detectar si hay productos con leche en el carrito
-  // Usar el campo lleva_leche del backend
-  const tieneProductosConLeche = cartItems.some(item => {
-    // Verificar lleva_leche del item directamente o del originalProduct
-    // Manejar diferentes formatos: boolean, 1/0, "1"/"0"
-    const llevaLecheItem = Boolean(item.lleva_leche === true || item.lleva_leche === 1)
-    const llevaLecheOriginal = Boolean(
-      item.originalProduct?.lleva_leche === true || 
-      item.originalProduct?.lleva_leche === 1 ||
-      item.originalProduct?.lleva_leche === "1"
-    )
-    
-    return llevaLecheItem || llevaLecheOriginal
-  })
-  
-  // Calcular extra por leche deslactosada o de almendras
-  // $15 por cada producto con leche (basado en cantidad)
+  // Calcular extras y tipo de leche por item individualmente
   const calcularExtraLeche = () => {
-    if (tipoLeche !== 'deslactosada' && tipoLeche !== 'almendras') return 0
-    
-    // Contar cantidad total de productos con leche en el carrito
-    const cantidadProductosConLeche = cartItems
-      .filter(item => {
-        // Manejar diferentes formatos: boolean, 1/0, "1"/"0"
-        const llevaLecheItem = Boolean(item.lleva_leche === true || item.lleva_leche === 1)
-        const llevaLecheOriginal = Boolean(
-          item.originalProduct?.lleva_leche === true || 
-          item.originalProduct?.lleva_leche === 1 ||
-          item.originalProduct?.lleva_leche === "1"
-        )
-        return llevaLecheItem || llevaLecheOriginal
-      })
-      .reduce((sum, item) => sum + item.quantity, 0)
-    
-    return cantidadProductosConLeche * 15 // $15 por cada producto con leche
+    let total = 0
+    cartItems.forEach(item => {
+      // Extra por leche deslactosada o de almendras ($15 por producto con leche)
+      if (item.tipoLeche && (item.tipoLeche === 'deslactosada' || item.tipoLeche === 'almendras')) {
+        total += 15 * item.quantity
+      }
+    })
+    return total
   }
   
-  // Obtener el nombre del tipo de leche para mostrar en el resumen
-  const getNombreTipoLeche = () => {
-    if (tipoLeche === 'deslactosada') return 'Leche Deslactosada'
-    if (tipoLeche === 'almendras') return 'Leche de Almendras'
-    return 'Leche'
+  // Calcular extra por extras seleccionados por item
+  const calcularExtraExtras = () => {
+    let total = 0
+    cartItems.forEach(item => {
+      // Extra por extras ($20 por cada extra, multiplicado por cantidad)
+      if (item.extras && item.extras.length > 0) {
+        total += item.extras.length * 20 * item.quantity
+      }
+    })
+    return total
   }
   
-  // Calcular total con extra por leche deslactosada
+  // Calcular total con extra por leche deslactosada y extras
   const baseTotal = getTotal()
   const extraLeche = calcularExtraLeche()
-  const totalFinal = baseTotal + extraLeche
+  const extraExtras = calcularExtraExtras()
+  const totalFinal = baseTotal + extraLeche + extraExtras
   
   useEffect(() => {
     // Resetear formulario cuando se abre el modal
@@ -63,9 +51,24 @@ export default function CheckoutModal({ isOpen, onClose, onConfirm, cartItems })
       setNombreCliente('')
       setTipoServicio('comer-aqui')
       setComentarios('')
-      setTipoLeche('entera')
     }
   }, [isOpen])
+  
+  // Función para obtener el nombre del tipo de leche
+  const getNombreTipoLeche = (tipoLeche) => {
+    if (tipoLeche === 'deslactosada') return 'Deslactosada'
+    if (tipoLeche === 'almendras') return 'Almendras'
+    return 'Entera'
+  }
+  
+  // Función para obtener nombres de extras
+  const getNombresExtras = (extrasIds) => {
+    if (!extrasIds || extrasIds.length === 0) return []
+    return extrasIds.map(id => {
+      const extra = extrasOpciones.find(e => e.id === id)
+      return extra ? extra.nombre : id
+    })
+  }
   
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -74,8 +77,10 @@ export default function CheckoutModal({ isOpen, onClose, onConfirm, cartItems })
       nombre_cliente: nombreCliente.trim() || null,
       tipo_servicio: tipoServicio,
       comentarios: comentarios.trim() || null,
-      tipo_leche: tieneProductosConLeche ? tipoLeche : null,
-      extra_leche: extraLeche > 0 ? extraLeche : 0
+      tipo_leche: null, // Ya no se usa globalmente, está en cada item
+      extra_leche: extraLeche > 0 ? extraLeche : 0,
+      extras: [], // Ya no se usa globalmente, está en cada item
+      extra_extras: extraExtras > 0 ? extraExtras : 0
     }
     
     onConfirm(checkoutData, totalFinal)
@@ -241,81 +246,42 @@ export default function CheckoutModal({ isOpen, onClose, onConfirm, cartItems })
                 </div>
               </div>
               
-              {/* Tipo de Leche (solo si hay productos con leche) */}
-              {tieneProductosConLeche && (
-                <div className="mb-4">
-                  <label 
-                    style={{
-                      display: 'block',
-                      marginBottom: '0.5rem',
-                      fontWeight: 600,
-                      color: 'var(--text)',
-                      fontSize: '0.9375rem'
-                    }}
-                  >
-                    Tipo de Leche
-                  </label>
-                  <div className="d-flex gap-2 flex-wrap">
-                    <button
-                      type="button"
-                      onClick={() => setTipoLeche('entera')}
-                      style={{
-                        flex: '1 1 calc(33.333% - 0.5rem)',
-                        minWidth: '120px',
-                        padding: '0.75rem',
-                        borderRadius: 'var(--radius)',
-                        border: `2px solid ${tipoLeche === 'entera' ? 'var(--matcha-500)' : 'var(--gray-300)'}`,
-                        background: tipoLeche === 'entera' ? 'var(--matcha-100)' : 'transparent',
-                        color: tipoLeche === 'entera' ? 'var(--matcha-700)' : 'var(--text)',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        fontSize: '0.875rem'
-                      }}
-                    >
-                      Entera
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setTipoLeche('deslactosada')}
-                      style={{
-                        flex: '1 1 calc(33.333% - 0.5rem)',
-                        minWidth: '120px',
-                        padding: '0.75rem',
-                        borderRadius: 'var(--radius)',
-                        border: `2px solid ${tipoLeche === 'deslactosada' ? 'var(--matcha-500)' : 'var(--gray-300)'}`,
-                        background: tipoLeche === 'deslactosada' ? 'var(--matcha-100)' : 'transparent',
-                        color: tipoLeche === 'deslactosada' ? 'var(--matcha-700)' : 'var(--text)',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        fontSize: '0.875rem'
-                      }}
-                    >
-                      Deslactosada (+$15)
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setTipoLeche('almendras')}
-                      style={{
-                        flex: '1 1 calc(33.333% - 0.5rem)',
-                        minWidth: '120px',
-                        padding: '0.75rem',
-                        borderRadius: 'var(--radius)',
-                        border: `2px solid ${tipoLeche === 'almendras' ? 'var(--matcha-500)' : 'var(--gray-300)'}`,
-                        background: tipoLeche === 'almendras' ? 'var(--matcha-100)' : 'transparent',
-                        color: tipoLeche === 'almendras' ? 'var(--matcha-700)' : 'var(--text)',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        fontSize: '0.875rem'
-                      }}
-                    >
-                      Almendras (+$15)
-                    </button>
-                  </div>
+              {/* Resumen de productos con sus opciones */}
+              <div className="mb-4">
+                <label 
+                  style={{
+                    display: 'block',
+                    marginBottom: '0.75rem',
+                    fontWeight: 600,
+                    color: 'var(--text)',
+                    fontSize: '0.9375rem'
+                  }}
+                >
+                  Resumen del Pedido
+                </label>
+                <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid var(--gray-300)', borderRadius: 'var(--radius)', padding: '0.75rem' }}>
+                  {cartItems.map((item, index) => (
+                    <div key={item.id || index} style={{ marginBottom: index < cartItems.length - 1 ? '0.75rem' : 0, paddingBottom: index < cartItems.length - 1 ? '0.75rem' : 0, borderBottom: index < cartItems.length - 1 ? '1px solid var(--gray-200)' : 'none' }}>
+                      <div style={{ fontWeight: 600, fontSize: '0.875rem', marginBottom: '0.25rem' }}>
+                        {item.name} {item.size && `(${item.size})`} x{item.quantity}
+                      </div>
+                      {(item.tipoPreparacion || item.tipoLeche || (item.extras && item.extras.length > 0)) && (
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-light)', marginLeft: '0.5rem' }}>
+                          {item.tipoPreparacion && (
+                            <div>• Preparación: {item.tipoPreparacion === 'heladas' ? 'Frío' : 'Frapeadas'}</div>
+                          )}
+                          {item.tipoLeche && item.tipoLeche !== 'entera' && (
+                            <div>• Leche: {getNombreTipoLeche(item.tipoLeche)} (+$15)</div>
+                          )}
+                          {item.extras && item.extras.length > 0 && (
+                            <div>• Extras: {getNombresExtras(item.extras).join(', ')} (+${item.extras.length * 20} c/u)</div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
-              )}
+              </div>
               
               {/* Comentarios */}
               <div className="mb-4">
@@ -366,10 +332,20 @@ export default function CheckoutModal({ isOpen, onClose, onConfirm, cartItems })
                   <span style={{ color: 'var(--text-light)' }}>Subtotal:</span>
                   <span style={{ fontWeight: 600 }}>${baseTotal.toFixed(2)}</span>
                 </div>
-                {tieneProductosConLeche && (tipoLeche === 'deslactosada' || tipoLeche === 'almendras') && extraLeche > 0 && (
+                {extraLeche > 0 && (
                   <div className="d-flex justify-content-between align-items-center mb-2">
-                    <span style={{ color: 'var(--text-light)' }}>{getNombreTipoLeche()}:</span>
+                    <span style={{ color: 'var(--text-light)' }}>
+                      Extra por leche especial:
+                    </span>
                     <span style={{ fontWeight: 600 }}>+${extraLeche.toFixed(2)}</span>
+                  </div>
+                )}
+                {extraExtras > 0 && (
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <span style={{ color: 'var(--text-light)' }}>
+                      Extras:
+                    </span>
+                    <span style={{ fontWeight: 600 }}>+${extraExtras.toFixed(2)}</span>
                   </div>
                 )}
                 <div 

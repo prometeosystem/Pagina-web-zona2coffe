@@ -131,6 +131,40 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
   const [addingToCart, setAddingToCart] = useState(false)
   const [tipoPreparacion, setTipoPreparacion] = useState(null) // 'heladas' o 'frapeadas'
   const [precioUnicoSeleccionado, setPrecioUnicoSeleccionado] = useState(false) // Para productos con un solo precio
+  const [tipoLeche, setTipoLeche] = useState('entera') // 'entera', 'deslactosada', 'almendras'
+  const [extrasSeleccionados, setExtrasSeleccionados] = useState([]) // Array de IDs de extras
+  
+  // Obtener los tamaños disponibles, ordenados (M primero, luego G) - DEBE IR ANTES DE USAR sizes
+  const sizes = Object.keys(item.sizes || {}).sort((a, b) => {
+    const order = { 'M': 1, 'G': 2, 'S': 0, 'UNICO': 3 }
+    return (order[a] || 99) - (order[b] || 99)
+  })
+  const hasMultipleSizes = sizes.length > 1 && sizes[0] !== 'UNICO'
+  
+  // Obtener el producto original del primer tamaño para verificar propiedades
+  const originalProduct = sizes.length > 0 && item.sizes && item.sizes[sizes[0]] 
+    ? item.sizes[sizes[0]].originalProduct 
+    : null
+  
+  // Verificar si el producto lleva leche
+  const llevaLeche = originalProduct && (
+    Boolean(originalProduct.lleva_leche === true || originalProduct.lleva_leche === 1) ||
+    Boolean(originalProduct.lleva_leche === "1")
+  )
+  
+  // Verificar si el producto lleva extras
+  const llevaExtras = originalProduct && (
+    Boolean(originalProduct.lleva_extras === true || originalProduct.lleva_extras === 1) ||
+    Boolean(originalProduct.lleva_extras === "1")
+  )
+  
+  // Opciones de extras disponibles
+  const extrasOpciones = [
+    { id: 'tocino', nombre: 'Tocino', precio: 20 },
+    { id: 'huevo', nombre: 'Huevo', precio: 20 },
+    { id: 'jamon', nombre: 'Jamón', precio: 20 },
+    { id: 'chorizo', nombre: 'Chorizo', precio: 20 }
+  ]
   
   const imageExpanded = expandedImageId === productId
   
@@ -153,13 +187,6 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
     return nombreLower.includes('smoothie') && (nombreLower.includes('mango') || nombreLower.includes('fresa'))
   }
   const isSmoothie = esSmoothie()
-  
-  // Obtener los tamaños disponibles, ordenados (M primero, luego G)
-  const sizes = Object.keys(item.sizes).sort((a, b) => {
-    const order = { 'M': 1, 'G': 2, 'S': 0, 'UNICO': 3 }
-    return (order[a] || 99) - (order[b] || 99)
-  })
-  const hasMultipleSizes = sizes.length > 1 && sizes[0] !== 'UNICO'
   
   // Si solo hay un tamaño y no es UNICO, seleccionarlo automáticamente (solo si NO es bebida fría)
   // Para bebidas frías con un solo precio, el usuario debe seleccionar el precio manualmente
@@ -204,6 +231,12 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
       alert('Por favor selecciona si quieres la bebida Fría o Frapeada')
       return
     }
+    
+    // Si el producto lleva leche y no se ha seleccionado tipo de leche, usar 'entera' por defecto (no validar, solo usar)
+    const tipoLecheFinal = llevaLeche ? tipoLeche : null
+    
+    // Si el producto lleva extras, usar los extras seleccionados (si no hay ninguno, usar array vacío)
+    const extrasFinal = llevaExtras ? extrasSeleccionados : []
 
     // Si ya está procesando, no hacer nada
     if (addingToCart) return
@@ -229,7 +262,9 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
         sizeData.originalProduct, 
         sizeToUse === 'UNICO' ? null : sizeToUse, 
         1,
-        (isBebidaFria && !isSmoothie) ? tipoPreparacion : null
+        (isBebidaFria && !isSmoothie) ? tipoPreparacion : null,
+        tipoLecheFinal,
+        extrasFinal
       )
       
       if (success) {
@@ -239,6 +274,12 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
         }
         if (!hasMultipleSizes) {
           setPrecioUnicoSeleccionado(false)
+        }
+        if (llevaLeche) {
+          setTipoLeche('entera') // Resetear a entera por defecto
+        }
+        if (llevaExtras) {
+          setExtrasSeleccionados([]) // Limpiar extras
         }
         // No limpiar la selección de tamaño para permitir agregar más del mismo tamaño
         // Mostrar feedback visual
@@ -254,6 +295,14 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
       console.error('Error agregando al carrito:', error)
     } finally {
       setAddingToCart(false)
+    }
+  }
+  
+  const handleExtraToggle = (extraId) => {
+    if (extrasSeleccionados.includes(extraId)) {
+      setExtrasSeleccionados(extrasSeleccionados.filter(id => id !== extraId))
+    } else {
+      setExtrasSeleccionados([...extrasSeleccionados, extraId])
     }
   }
   
@@ -406,6 +455,97 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
                 >
                   Frapeadas
                 </button>
+              </div>
+            </div>
+          )}
+          
+          {/* Selector de tipo de leche (solo se muestra si el producto lleva leche y hay un tamaño/precio seleccionado) */}
+          {llevaLeche && (
+            (hasMultipleSizes && selectedSize) || 
+            (!hasMultipleSizes && precioUnicoSeleccionado)
+          ) && (
+            <div className="mb-3">
+              <p className="small text-muted mb-2" style={{fontWeight: 500}}>Tipo de leche:</p>
+              <div className="d-flex gap-2 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => setTipoLeche('entera')}
+                  className={`btn ${tipoLeche === 'entera' ? 'btn-success' : 'btn-outline-success'}`}
+                  style={{
+                    flex: '1 1 auto',
+                    minWidth: '90px',
+                    fontSize: '0.875rem',
+                    fontWeight: tipoLeche === 'entera' ? 600 : 400,
+                    transition: 'all 0.2s',
+                    borderWidth: tipoLeche === 'entera' ? '2px' : '1px',
+                    padding: '0.5rem 0.75rem'
+                  }}
+                >
+                  Entera
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTipoLeche('deslactosada')}
+                  className={`btn ${tipoLeche === 'deslactosada' ? 'btn-success' : 'btn-outline-success'}`}
+                  style={{
+                    flex: '1 1 auto',
+                    minWidth: '90px',
+                    fontSize: '0.875rem',
+                    fontWeight: tipoLeche === 'deslactosada' ? 600 : 400,
+                    transition: 'all 0.2s',
+                    borderWidth: tipoLeche === 'deslactosada' ? '2px' : '1px',
+                    padding: '0.5rem 0.75rem'
+                  }}
+                >
+                  Deslactosada (+$15)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTipoLeche('almendras')}
+                  className={`btn ${tipoLeche === 'almendras' ? 'btn-success' : 'btn-outline-success'}`}
+                  style={{
+                    flex: '1 1 auto',
+                    minWidth: '90px',
+                    fontSize: '0.875rem',
+                    fontWeight: tipoLeche === 'almendras' ? 600 : 400,
+                    transition: 'all 0.2s',
+                    borderWidth: tipoLeche === 'almendras' ? '2px' : '1px',
+                    padding: '0.5rem 0.75rem'
+                  }}
+                >
+                  Almendras (+$15)
+                </button>
+              </div>
+            </div>
+          )}
+          
+          {/* Selector de extras (solo se muestra si el producto lleva extras y hay un tamaño/precio seleccionado) */}
+          {llevaExtras && (
+            (hasMultipleSizes && selectedSize) || 
+            (!hasMultipleSizes && precioUnicoSeleccionado)
+          ) && (
+            <div className="mb-3">
+              <p className="small text-muted mb-2" style={{fontWeight: 500}}>Extras (+$20 c/u):</p>
+              <div className="d-flex gap-2 flex-wrap">
+                {extrasOpciones.map(extra => (
+                  <button
+                    key={extra.id}
+                    type="button"
+                    onClick={() => handleExtraToggle(extra.id)}
+                    className={`btn ${extrasSeleccionados.includes(extra.id) ? 'btn-success' : 'btn-outline-success'}`}
+                    style={{
+                      flex: '1 1 calc(50% - 0.5rem)',
+                      minWidth: '100px',
+                      fontSize: '0.875rem',
+                      fontWeight: extrasSeleccionados.includes(extra.id) ? 600 : 400,
+                      transition: 'all 0.2s',
+                      borderWidth: extrasSeleccionados.includes(extra.id) ? '2px' : '1px',
+                      padding: '0.5rem 0.75rem'
+                    }}
+                  >
+                    {extra.nombre}
+                  </button>
+                ))}
               </div>
             </div>
           )}
