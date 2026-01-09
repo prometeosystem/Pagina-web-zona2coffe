@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getProducts } from '../services/api'
+import { getProducts, API_BASE_URL } from '../services/api'
 
 /**
  * Hook para obtener productos del backend
@@ -17,6 +17,12 @@ export const useProducts = () => {
         setError(null)
         const data = await getProducts()
         
+        // Validar que la respuesta sea un array
+        if (!Array.isArray(data)) {
+          console.error('La respuesta del backend no es un array:', data)
+          throw new Error('Formato de respuesta inválido del servidor')
+        }
+        
         // Transformar productos del backend al formato esperado
         // El backend ya filtra por activo=1, pero filtramos de nuevo por seguridad
         const transformedProducts = data
@@ -30,10 +36,23 @@ export const useProducts = () => {
               ? precio.toFixed(0) 
               : precio.toFixed(2)
 
+            const productId = product.id_producto || product.id
+            // El backend puede enviar imagen_url como data URL base64 O solo tipo_imagen
+            // Si hay imagen_url (data URL), usarlo directamente
+            // Si no hay imagen_url pero hay tipo_imagen, construir URL del endpoint
+            let imageUrl = null
+            if (product.imagen_url) {
+              // Prioridad 1: usar imagen_url del backend (data URL base64)
+              imageUrl = product.imagen_url
+            } else if (product.tipo_imagen && product.tipo_imagen.trim() !== '') {
+              // Prioridad 2: si hay tipo_imagen pero no imagen_url, usar endpoint del backend
+              imageUrl = `${API_BASE_URL}/productos/imagen/${productId}`
+            }
+
             return {
               // IDs - compatible con ambos formatos
-              id: product.id_producto || product.id,
-              id_producto: product.id_producto || product.id,
+              id: productId,
+              id_producto: productId,
               
               // Nombres
               name: product.nombre || product.name || '',
@@ -47,6 +66,12 @@ export const useProducts = () => {
               price: precioFormateado,
               precio: precio,
               
+              // Imagen del backend - usar imagen_url (data URL) si existe, sino null
+              image: imageUrl,
+              imagen: imageUrl,
+              image_url: imageUrl,
+              url_imagen: imageUrl,
+              
               // Tamaños (si el backend los tiene en el futuro)
               size: product.tamaño || product.size || null,
               size2: product.tamaño2 || product.size2 || null,
@@ -56,6 +81,14 @@ export const useProducts = () => {
               
               // Categoría del backend (ej: "Bebidas Calientes", "Alimentos")
               categoria: product.categoria || product.categoria_id || null,
+              
+              // Lleva leche - el backend retorna lleva_leche como 1/0 o true/false
+              // Convertir a boolean explícitamente
+              lleva_leche: Boolean(product.lleva_leche === 1 || product.lleva_leche === true),
+              
+              // Lleva extras - el backend retorna lleva_extras como 1/0 o true/false
+              // Convertir a boolean explícitamente
+              lleva_extras: Boolean(product.lleva_extras === 1 || product.lleva_extras === true),
               
               // Estado - el backend retorna activo como 1 o 0
               activo: product.activo === 1 || product.activo === true,
@@ -114,6 +147,12 @@ export const useProductsByCategory = () => {
       'shots-energia': 'shotsEnergia',
       'shots-de-energia': 'shotsEnergia',
       'shots_de_energia': 'shotsEnergia',
+      'shot-energia': 'shotsEnergia',
+      'shot-de-energia': 'shotsEnergia',
+      'shot_de_energia': 'shotsEnergia',
+      'shot energia': 'shotsEnergia',
+      'shot de energia': 'shotsEnergia',
+      'shot de energía': 'shotsEnergia',
       
       // Bebidas con Proteína
       'bebidas con proteína': 'bebidasProteina',
@@ -121,6 +160,9 @@ export const useProductsByCategory = () => {
       'bebidas-proteina': 'bebidasProteina',
       'bebidas-con-proteina': 'bebidasProteina',
       'bebidas_con_proteina': 'bebidasProteina',
+      'bebidas fitness': 'bebidasProteina',
+      'bebidas-fitness': 'bebidasProteina',
+      'bebidas_fitness': 'bebidasProteina',
       
       // Menú Dulce
       'menú dulce': 'menuDulce',
@@ -163,7 +205,44 @@ export const useProductsByCategory = () => {
 
     products.forEach(product => {
       // Normalizar la categoría: convertir a minúsculas y quitar espacios extra
-      const categoria = product.categoria?.toLowerCase().trim() || product.categoria_id?.toLowerCase().trim() || ''
+      let categoria = product.categoria?.toLowerCase().trim() || product.categoria_id?.toLowerCase().trim() || ''
+      const nombre = (product.nombre || product.name || '').toLowerCase()
+      const descripcion = (product.descripcion || product.desc || '').toLowerCase()
+      
+      // Lógica especial para "runner_proteina": todos van a bebidas con proteína
+      if (categoria === 'runner_proteina' || categoria === 'runner-proteina' || categoria === 'runner proteina') {
+        // Todos los productos con categoría runner_proteina van a la sección de bebidas con proteína
+        categoria = 'bebidas_con_proteina'
+      }
+      
+      // Lógica especial para "shot-energia" y variantes: todos van a shots de energía
+      if (categoria === 'shot-energia' || categoria === 'shot-de-energia' || categoria === 'shot_de_energia' || 
+          categoria === 'shot energia' || categoria === 'shot de energia' || categoria === 'shot de energía' ||
+          categoria === 'shots-energia' || categoria === 'shots-de-energia' || categoria === 'shots_de_energia' ||
+          categoria === 'shots de energia' || categoria === 'shots de energía') {
+        // Todos los productos con categoría relacionada a shots de energía van a esa sección
+        categoria = 'shots_de_energia'
+      }
+      
+      // Lógica especial para "Bebidas Fitness": diferenciar entre shots de energía y bebidas con proteína
+      if (categoria === 'bebidas fitness' || categoria === 'bebidas-fitness' || categoria === 'bebidas_fitness') {
+        // Si la descripción contiene "scoop" o el nombre contiene palabras clave de proteína
+        // entonces es una bebida con proteína, de lo contrario es un shot de energía
+        if (descripcion.includes('scoop') || descripcion.includes('proteína') || descripcion.includes('proteina')) {
+          categoria = 'bebidas_con_proteina' // Mapear a bebidas con proteína
+        } else {
+          categoria = 'shots_de_energia' // Mapear a shots de energía
+        }
+      }
+      
+      // Lógica especial para separar ensaladas del menú salado
+      if (categoria === 'menu_salado' || categoria === 'menu-salado' || categoria === 'menu salado') {
+        // Si el nombre es "Ensaladas" o contiene palabras clave de ensalada
+        if (nombre === 'ensaladas' || nombre.includes('ensalada') || nombre.includes('bowl')) {
+          categoria = 'ensaladas'
+        }
+      }
+      
       const mappedCategory = categoryMap[categoria] || 'otros'
       
       if (organized[mappedCategory]) {

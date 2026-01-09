@@ -1,5 +1,5 @@
 // Configuración de la API
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'
 
 /**
  * Obtiene todos los productos activos del menú
@@ -15,11 +15,32 @@ export const getProducts = async () => {
     })
 
     if (!response.ok) {
-      throw new Error('Error al obtener los productos')
+      // Intentar obtener más información del error
+      let errorMessage = `Error al obtener los productos: ${response.status} ${response.statusText}`
+      try {
+        const errorData = await response.json()
+        errorMessage = errorData.detail || errorData.message || errorMessage
+      } catch (e) {
+        // Si no se puede parsear el JSON, usar el mensaje por defecto
+        const text = await response.text()
+        if (text) {
+          errorMessage = `${errorMessage} - ${text}`
+        }
+      }
+      throw new Error(errorMessage)
     }
 
     return await response.json()
   } catch (error) {
+    // Mejorar el mensaje de error para problemas de conexión
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      console.error('Error de conexión con el backend:', {
+        message: error.message,
+        url: `${API_BASE_URL}/productos/ver_productos`,
+        suggestion: 'Verifica que el backend esté corriendo en el puerto 8000'
+      })
+      throw new Error('No se pudo conectar con el servidor. Verifica que el backend esté corriendo.')
+    }
     console.error('Error obteniendo productos:', error)
     throw error
   }
@@ -59,9 +80,14 @@ export const createPreorden = async (preordenData, detalles) => {
       // Campos adicionales que el backend puede usar (si los soporta)
       tipo_servicio: preordenData.tipo_servicio || null,  // 'comer-aqui' o 'para-llevar'
       comentarios: preordenData.comentarios || null,  // Comentarios generales
-      tipo_leche: preordenData.tipo_leche || null,  // 'entera' o 'deslactosada'
-      extra_leche: preordenData.extra_leche || 0  // Extra por leche deslactosada ($15)
+      tipo_leche: preordenData.tipo_leche || null,  // 'entera', 'deslactosada' o 'almendras'
+      extra_leche: preordenData.extra_leche || 0,  // Extra por leche deslactosada o almendras ($15)
+      extra_extras: preordenData.extra_extras || 0,  // Extra por extras seleccionados (Tocino, huevo, jamón, chorizo) - $20 cada uno
+      estado: 'en_caja'  // Estado requerido para que el punto de venta pueda procesar el pago
     }
+
+    // Debug: Log del payload que se envía
+    console.log('Payload enviado al backend:', JSON.stringify(preordenPayload, null, 2))
 
     const response = await fetch(`${API_BASE_URL}/preordenes/crear_preorden`, {
       method: 'POST',
@@ -72,11 +98,26 @@ export const createPreorden = async (preordenData, detalles) => {
     })
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
-      throw new Error(errorData.detail || errorData.message || 'Error al crear la pre-orden')
+      // Intentar obtener el error del backend
+      let errorMessage = `Error al crear la pre-orden: ${response.status} ${response.statusText}`
+      try {
+        const errorData = await response.json()
+        errorMessage = errorData.detail || errorData.message || errorMessage
+        console.error('Error del backend:', errorData)
+      } catch (e) {
+        // Si no se puede parsear el JSON, obtener el texto
+        const text = await response.text()
+        if (text) {
+          errorMessage = `${errorMessage} - ${text}`
+        }
+        console.error('Error al parsear respuesta del backend:', text)
+      }
+      throw new Error(errorMessage)
     }
 
-    return await response.json()
+    const data = await response.json()
+    console.log('Respuesta exitosa del backend:', data)
+    return data
   } catch (error) {
     console.error('Error creando pre-orden:', error)
     throw error

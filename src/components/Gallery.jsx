@@ -59,11 +59,23 @@ export default function Gallery(){
             <div className="col-12 col-lg-6" data-aos="fade-left">
               <div className="px-4 py-3">
                 <h4 style={{fontSize: 'clamp(1.5rem, 3vw, 2rem)', fontWeight: 700, marginBottom: '1.5rem', color: 'var(--text)', letterSpacing: '-0.02em'}}>Sobre nosotros</h4>
-                <p className="lead" style={{color: 'var(--text-light)', lineHeight: '1.8', marginBottom: '1.5rem', fontSize: '1.125rem'}}>
-                  Somos Zona 2, un lugar para recuperar tu energía con el mejor café, postres caseros y un ambiente acogedor.
+                <p style={{color: 'var(--text-light)', lineHeight: '1.8', marginBottom: '1.5rem', fontSize: '1.125rem', textAlign: 'justify'}}>
+                  Zona 2 no es solo café.
                 </p>
-                <p style={{color: 'var(--muted)', lineHeight: '1.8', marginBottom: 0, fontSize: '1rem'}}>
-                  Nos enfocamos en calidad, servicio y una experiencia que te haga volver. Cada taza de café está preparada con dedicación, cada postre es hecho con amor, y cada visita es una oportunidad para crear momentos especiales.
+                <p style={{color: 'var(--text-light)', lineHeight: '1.8', marginBottom: '1.5rem', fontSize: '1.125rem', textAlign: 'justify'}}>
+                  Es un espacio creado para recuperar energía, optimizar el rendimiento y volver al ritmo que te mueve.
+                </p>
+                <p style={{color: 'var(--text-light)', lineHeight: '1.8', marginBottom: '1.5rem', fontSize: '1.125rem', textAlign: 'justify'}}>
+                  En el running, la zona 2 es donde el cuerpo aprende a sostener, recuperar y construir energía. Ese principio es el que vive aquí. Creemos en los rituales que suman: café bien preparado, comida que nutre y un entorno que te permite bajar el ritmo para volver más fuerte.
+                </p>
+                <p style={{color: 'var(--text-light)', lineHeight: '1.8', marginBottom: '1.5rem', fontSize: '1.125rem', textAlign: 'justify'}}>
+                  Nuestra cocina y bebidas están pensadas para acompañar el esfuerzo: opciones que te inyectan energía, te ayudan a reponer lo gastado y favorecen la recuperación, ya sea antes, durante o después del entrenamiento —o de un día intenso.
+                </p>
+                <p style={{color: 'var(--text-light)', lineHeight: '1.8', marginBottom: '1.5rem', fontSize: '1.125rem', textAlign: 'justify'}}>
+                  Zona 2 es comunidad, constancia y equilibrio.
+                </p>
+                <p style={{color: 'var(--text-light)', lineHeight: '1.8', marginBottom: 0, fontSize: '1.125rem', textAlign: 'justify'}}>
+                  El punto donde el cuerpo se recupera, la mente se ordena y el movimiento continúa.
                 </p>
               </div>
             </div>

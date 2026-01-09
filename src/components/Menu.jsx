@@ -1,16 +1,13 @@
 import React from 'react'
 import { useProducts } from '../hooks/useProducts'
-import menuDataFallback from '../data/menu.json'
 
-export default function Menu({items=[]}){
+export default function Menu(){
   const { products, loading } = useProducts()
   
-  // Usar productos del backend si están disponibles, sino usar items prop o fallback
-  const menuItems = items.length > 0 
-    ? items 
-    : (!loading && products.length > 0) 
-      ? products.slice(0, 3) // Mostrar primeros 3 productos como promociones
-      : menuDataFallback
+  // Usar productos del backend únicamente
+  const menuItems = (!loading && products.length > 0) 
+    ? products.slice(0, 3) // Mostrar primeros 3 productos como promociones
+    : []
 
   // Función para calcular precio con descuento (20% de descuento)
   const getDiscountPrice = (price) => {
@@ -47,19 +44,27 @@ export default function Menu({items=[]}){
                 <span className="visually-hidden">Cargando...</span>
               </div>
             </div>
-          ) : (
+          ) : menuItems.length > 0 ? (
             menuItems.map((item, idx)=> {
-              const images = [
-                '/assets/imagenUno.jpg','/assets/imagenDos.jpg','/assets/imagenTres.jpg','/assets/imagenCuatro.jpg','/assets/imagenCinco.jpg',
-                '/assets/imagenSeis.jpg','/assets/imagenSiete.jpg','/assets/imagenOcho.jpg','/assets/imagenNueve.jpg','/assets/imagenDiez.jpg'
-              ]
-              const img = item.image || images[idx % images.length]
+              // Solo usar imagen del backend si existe (puede venir como imagen_url base64 o como URL del endpoint)
+              const backendImage = item.image || item.imagen || item.image_url || item.url_imagen || null
               const originalPrice = getFormattedPrice(item)
               const discountPrice = getDiscountPrice(item.price || item.precio)
               return (
                 <div className="col-sm-6 col-md-4" key={item.id || item.id_producto} data-aos="fade-up" data-aos-delay={idx*80}>
                   <div className="card h-100 shadow-sm">
-                    <img src={img} className="card-img-top" alt={item.name || item.nombre} style={{height:180,objectFit:'cover'}} />
+                    {backendImage && (
+                      <img 
+                        src={backendImage} 
+                        className="card-img-top" 
+                        alt={item.name || item.nombre} 
+                        style={{height:180,objectFit:'cover'}}
+                        onError={(e) => {
+                          // Si la imagen falla al cargar, ocultarla completamente
+                          e.target.style.display = 'none'
+                        }}
+                      />
+                    )}
                     <div className="card-body d-flex flex-column">
                       <h5 className="card-title">{item.name || item.nombre}</h5>
                       <p className="card-text text-muted small">{item.desc || item.descripcion}</p>
@@ -72,6 +77,10 @@ export default function Menu({items=[]}){
                 </div>
               )
             })
+          ) : (
+            <div className="col-12 text-center py-5">
+              <p className="text-muted">No hay promociones disponibles en este momento</p>
+            </div>
           )}
         </div>
       </div>
