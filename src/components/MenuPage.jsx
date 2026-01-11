@@ -133,6 +133,7 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
   const [precioUnicoSeleccionado, setPrecioUnicoSeleccionado] = useState(false) // Para productos con un solo precio
   const [tipoLeche, setTipoLeche] = useState('entera') // 'entera', 'deslactosada', 'almendras'
   const [extrasSeleccionados, setExtrasSeleccionados] = useState([]) // Array de IDs de extras
+  const [tipoProteina, setTipoProteina] = useState(null) // 'proteina' o 'creatina'
   
   // Obtener los tamaños disponibles, ordenados (M primero, luego G) - DEBE IR ANTES DE USAR sizes
   const sizes = Object.keys(item.sizes || {}).sort((a, b) => {
@@ -156,6 +157,14 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
   const llevaExtras = originalProduct && (
     Boolean(originalProduct.lleva_extras === true || originalProduct.lleva_extras === 1) ||
     Boolean(originalProduct.lleva_extras === "1")
+  )
+  
+  // Verificar si el producto lleva proteína
+  const llevaProteina = originalProduct && (
+    Boolean(originalProduct.lleva_proteina === true || originalProduct.lleva_proteina === 1) ||
+    Boolean(originalProduct.lleva_proteina === "1") ||
+    originalProduct.categoria === 'runner_proteina' ||
+    originalProduct.categoria === 'Bebidas Fitness'
   )
   
   // Opciones de extras disponibles
@@ -237,6 +246,9 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
     
     // Si el producto lleva extras, usar los extras seleccionados (si no hay ninguno, usar array vacío)
     const extrasFinal = llevaExtras ? extrasSeleccionados : []
+    
+    // Si el producto lleva proteína, usar el tipo seleccionado
+    const tipoProteinaFinal = llevaProteina ? tipoProteina : null
 
     // Si ya está procesando, no hacer nada
     if (addingToCart) return
@@ -264,7 +276,8 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
         1,
         (isBebidaFria && !isSmoothie) ? tipoPreparacion : null,
         tipoLecheFinal,
-        extrasFinal
+        extrasFinal,
+        tipoProteinaFinal
       )
       
       if (success) {
@@ -280,6 +293,9 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
         }
         if (llevaExtras) {
           setExtrasSeleccionados([]) // Limpiar extras
+        }
+        if (llevaProteina) {
+          setTipoProteina(null) // Limpiar tipo de proteína
         }
         // No limpiar la selección de tamaño para permitir agregar más del mismo tamaño
         // Mostrar feedback visual
@@ -550,16 +566,60 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
             </div>
           )}
           
+          {/* Selector de Proteína/Creatina (solo se muestra si el producto lleva proteína y hay un tamaño/precio seleccionado) */}
+          {llevaProteina && (
+            (hasMultipleSizes && selectedSize) || 
+            (!hasMultipleSizes && precioUnicoSeleccionado)
+          ) && (
+            <div className="mb-3">
+              <p className="small text-muted mb-2" style={{fontWeight: 500}}>Scoop:</p>
+              <div className="d-flex gap-2 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => setTipoProteina('proteina')}
+                  className={`btn ${tipoProteina === 'proteina' ? 'btn-success' : 'btn-outline-success'}`}
+                  style={{
+                    flex: '1 1 calc(50% - 0.5rem)',
+                    minWidth: '100px',
+                    fontSize: '0.875rem',
+                    fontWeight: tipoProteina === 'proteina' ? 600 : 400,
+                    transition: 'all 0.2s',
+                    borderWidth: tipoProteina === 'proteina' ? '2px' : '1px',
+                    padding: '0.5rem 0.75rem'
+                  }}
+                >
+                  Proteína
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTipoProteina('creatina')}
+                  className={`btn ${tipoProteina === 'creatina' ? 'btn-success' : 'btn-outline-success'}`}
+                  style={{
+                    flex: '1 1 calc(50% - 0.5rem)',
+                    minWidth: '100px',
+                    fontSize: '0.875rem',
+                    fontWeight: tipoProteina === 'creatina' ? 600 : 400,
+                    transition: 'all 0.2s',
+                    borderWidth: tipoProteina === 'creatina' ? '2px' : '1px',
+                    padding: '0.5rem 0.75rem'
+                  }}
+                >
+                  Creatina
+                </button>
+              </div>
+            </div>
+          )}
+          
           {/* Botón único de agregar al carrito */}
           <button
             data-item-id={productId}
             className={`btn btn-add-to-cart w-100 ${selectedSize || !hasMultipleSizes ? 'btn-success' : 'btn-secondary'}`}
             onClick={handleAddToCart}
-            disabled={addingToCart || (hasMultipleSizes && !selectedSize) || (!hasMultipleSizes && !precioUnicoSeleccionado) || (isBebidaFria && !isSmoothie && !tipoPreparacion)}
+            disabled={addingToCart || (hasMultipleSizes && !selectedSize) || (!hasMultipleSizes && !precioUnicoSeleccionado) || (isBebidaFria && !isSmoothie && !tipoPreparacion) || (llevaProteina && !tipoProteina)}
             style={{
               transition: 'all 0.2s',
-              opacity: (hasMultipleSizes && !selectedSize) || (!hasMultipleSizes && !precioUnicoSeleccionado) || (isBebidaFria && !isSmoothie && !tipoPreparacion) ? 0.5 : 1,
-              cursor: (hasMultipleSizes && !selectedSize) || (!hasMultipleSizes && !precioUnicoSeleccionado) || (isBebidaFria && !isSmoothie && !tipoPreparacion) ? 'not-allowed' : 'pointer'
+              opacity: (hasMultipleSizes && !selectedSize) || (!hasMultipleSizes && !precioUnicoSeleccionado) || (isBebidaFria && !isSmoothie && !tipoPreparacion) || (llevaProteina && !tipoProteina) ? 0.5 : 1,
+              cursor: (hasMultipleSizes && !selectedSize) || (!hasMultipleSizes && !precioUnicoSeleccionado) || (isBebidaFria && !isSmoothie && !tipoPreparacion) || (llevaProteina && !tipoProteina) ? 'not-allowed' : 'pointer'
             }}
           >
             {addingToCart ? (

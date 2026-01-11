@@ -17,7 +17,7 @@ export const CartProvider = ({ children }) => {
   const [error, setError] = useState(null)
 
   // Agregar producto al carrito con validación en el backend
-  const addToCart = useCallback(async (product, selectedSize = null, quantity = 1, tipoPreparacion = null, tipoLeche = null, extras = []) => {
+  const addToCart = useCallback(async (product, selectedSize = null, quantity = 1, tipoPreparacion = null, tipoLeche = null, extras = [], tipoProteina = null) => {
     setIsLoading(true)
     setError(null)
 
@@ -59,13 +59,14 @@ export const CartProvider = ({ children }) => {
         price = price.replace('$', '').replace(',', '').trim()
       }
 
-      // Crear un hash único para tipoLeche y extras para el ID
+      // Crear un hash único para tipoLeche, extras y tipoProteina para el ID
       const tipoLecheHash = tipoLeche || 'none'
       const extrasHash = extras && extras.length > 0 ? extras.sort().join(',') : 'none'
+      const tipoProteinaHash = tipoProteina || 'none'
 
       // Crear item del carrito
       const cartItem = {
-        id: `${productId}-${size}-${tipoPreparacion || 'default'}-${tipoLecheHash}-${extrasHash}-${Date.now()}`,
+        id: `${productId}-${size}-${tipoPreparacion || 'default'}-${tipoLecheHash}-${extrasHash}-${tipoProteinaHash}-${Date.now()}`,
         productId: productId,
         name: product.nombre || product.name,
         description: product.descripcion || product.desc || '',
@@ -75,13 +76,14 @@ export const CartProvider = ({ children }) => {
         tipoPreparacion: tipoPreparacion, // 'heladas' o 'frapeadas' para bebidas frías
         tipoLeche: tipoLeche, // 'entera', 'deslactosada', 'almendras' o null
         extras: extras && extras.length > 0 ? [...extras] : [], // Array de IDs de extras
+        tipoProteina: tipoProteina, // 'proteina' o 'creatina' o null
         categoria: product.categoria || product.categoria_id || null, // Guardar categoría directamente
         lleva_leche: Boolean(product.lleva_leche === true || product.lleva_leche === 1), // Guardar lleva_leche directamente
         lleva_extras: Boolean(product.lleva_extras === true || product.lleva_extras === 1), // Guardar lleva_extras directamente
         originalProduct: product
       }
 
-      // Verificar si el producto ya está en el carrito (mismo ID, tamaño, tipo de preparación, tipo de leche y extras)
+      // Verificar si el producto ya está en el carrito (mismo ID, tamaño, tipo de preparación, tipo de leche, extras y tipo de proteína)
       setCartItems(prevItems => {
         const existingItemIndex = prevItems.findIndex(
           item => 
@@ -89,7 +91,8 @@ export const CartProvider = ({ children }) => {
             item.size === size && 
             item.tipoPreparacion === tipoPreparacion &&
             item.tipoLeche === tipoLeche &&
-            JSON.stringify(item.extras?.sort() || []) === JSON.stringify(extras?.sort() || [])
+            JSON.stringify(item.extras?.sort() || []) === JSON.stringify(extras?.sort() || []) &&
+            item.tipoProteina === tipoProteina
         )
 
         if (existingItemIndex >= 0) {
