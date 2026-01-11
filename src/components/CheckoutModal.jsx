@@ -265,7 +265,7 @@ export default function CheckoutModal({ isOpen, onClose, onConfirm, cartItems })
                       <div style={{ fontWeight: 600, fontSize: '0.875rem', marginBottom: '0.25rem' }}>
                         {item.name} {item.size && `(${item.size})`} x{item.quantity}
                       </div>
-                      {(item.tipoPreparacion || item.tipoLeche || (item.extras && item.extras.length > 0)) && (
+                      {(item.tipoPreparacion || item.tipoLeche || (item.extras && item.extras.length > 0) || item.tipoProteina) && (
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-light)', marginLeft: '0.5rem' }}>
                           {item.tipoPreparacion && (
                             <div>• Preparación: {item.tipoPreparacion === 'heladas' ? 'Frío' : 'Frapeadas'}</div>
@@ -275,6 +275,9 @@ export default function CheckoutModal({ isOpen, onClose, onConfirm, cartItems })
                           )}
                           {item.extras && item.extras.length > 0 && (
                             <div>• Extras: {getNombresExtras(item.extras).join(', ')} (+${item.extras.length * 20} c/u)</div>
+                          )}
+                          {item.tipoProteina && (
+                            <div>• Scoop: {item.tipoProteina === 'proteina' ? 'Proteína' : 'Creatina'}</div>
                           )}
                         </div>
                       )}

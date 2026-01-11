@@ -90,6 +90,10 @@ export const useProducts = () => {
               // Convertir a boolean explícitamente
               lleva_extras: Boolean(product.lleva_extras === 1 || product.lleva_extras === true),
               
+              // Lleva proteína - el backend retorna lleva_proteina como 1/0 o true/false
+              // Convertir a boolean explícitamente
+              lleva_proteina: Boolean(product.lleva_proteina === 1 || product.lleva_proteina === true),
+              
               // Estado - el backend retorna activo como 1 o 0
               activo: product.activo === 1 || product.activo === true,
               

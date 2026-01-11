@@ -59,6 +59,11 @@ export default function Cart({ isOpen, onClose }) {
           observaciones.push(`Extras: ${nombresExtras.join(', ')}`)
         }
         
+        // Agregar tipo de proteína si existe
+        if (item.tipoProteina) {
+          observaciones.push(`Scoop: ${item.tipoProteina === 'proteina' ? 'Proteína' : 'Creatina'}`)
+        }
+        
         return {
           id_producto: item.productId,
           cantidad: item.quantity,
@@ -345,6 +350,18 @@ export default function Cart({ isOpen, onClose }) {
                               const extra = extrasOpciones.find(e => e.id === extraId)
                               return extra ? extra.nombre : extraId
                             }).join(', ')}
+                          </span>
+                        )}
+                        {item.tipoProteina && (
+                          <span className="badge" style={{ 
+                            background: '#fef3c7', 
+                            color: '#92400e',
+                            fontSize: '0.75rem',
+                            padding: '0.25rem 0.5rem',
+                            borderRadius: '9999px',
+                            fontWeight: 500
+                          }}>
+                            Scoop: {item.tipoProteina === 'proteina' ? 'Proteína' : 'Creatina'}
                           </span>
                         )}
                       </div>
