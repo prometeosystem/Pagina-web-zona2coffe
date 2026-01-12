@@ -19,9 +19,13 @@ export default function CheckoutModal({ isOpen, onClose, onConfirm, cartItems })
   const calcularExtraLeche = () => {
     let total = 0
     cartItems.forEach(item => {
-      // Extra por leche deslactosada o de almendras ($15 por producto con leche)
-      if (item.tipoLeche && (item.tipoLeche === 'deslactosada' || item.tipoLeche === 'almendras')) {
-        total += 15 * item.quantity
+      // Extra por leche deslactosada ($15) o de almendras ($20) por producto con leche
+      if (item.tipoLeche) {
+        if (item.tipoLeche === 'deslactosada') {
+          total += 15 * item.quantity
+        } else if (item.tipoLeche === 'almendras') {
+          total += 20 * item.quantity
+        }
       }
     })
     return total
@@ -271,7 +275,7 @@ export default function CheckoutModal({ isOpen, onClose, onConfirm, cartItems })
                             <div>• Preparación: {item.tipoPreparacion === 'heladas' ? 'Frío' : 'Frapeadas'}</div>
                           )}
                           {item.tipoLeche && item.tipoLeche !== 'entera' && (
-                            <div>• Leche: {getNombreTipoLeche(item.tipoLeche)} (+$15)</div>
+                            <div>• Leche: {getNombreTipoLeche(item.tipoLeche)} (+${item.tipoLeche === 'almendras' ? '20' : '15'})</div>
                           )}
                           {item.extras && item.extras.length > 0 && (
                             <div>• Extras: {getNombresExtras(item.extras).join(', ')} (+${item.extras.length * 20} c/u)</div>

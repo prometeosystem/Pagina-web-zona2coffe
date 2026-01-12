@@ -81,7 +81,7 @@ export const createPreorden = async (preordenData, detalles) => {
       tipo_servicio: preordenData.tipo_servicio || null,  // 'comer-aqui' o 'para-llevar'
       comentarios: preordenData.comentarios || null,  // Comentarios generales
       tipo_leche: preordenData.tipo_leche || null,  // 'entera', 'deslactosada' o 'almendras'
-      extra_leche: preordenData.extra_leche || 0,  // Extra por leche deslactosada o almendras ($15)
+      extra_leche: preordenData.extra_leche || 0,  // Extra por leche deslactosada ($15) o almendras ($20)
       extra_extras: preordenData.extra_extras || 0,  // Extra por extras seleccionados (Tocino, huevo, jamón, chorizo) - $20 cada uno
       estado: 'en_caja'  // Estado requerido para que el punto de venta pueda procesar el pago
     }

@@ -529,7 +529,7 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
                     padding: '0.5rem 0.75rem'
                   }}
                 >
-                  Almendras (+$15)
+                  Almendras (+$20)
                 </button>
               </div>
             </div>
