@@ -113,10 +113,11 @@ export default function Cart({ isOpen, onClose }) {
         // Mostrar SweetAlert de éxito
         await Swal.fire({
           icon: 'success',
-          title: '¡Pedido Creado Exitosamente!',
-          text: 'Favor de pasar a barra a pagar',
-          confirmButtonColor: 'var(--matcha-500)',
-          confirmButtonText: 'Entendido',
+          title: 'Favor de pasar a barra a pagar',
+          html: '<p style="color: red; margin-top: 1rem;">Tu pedido comenzará a prepararse después de pagar</p>',
+          showConfirmButton: false,
+          allowOutsideClick: true,
+          allowEscapeKey: false,
           customClass: {
             popup: 'swal-custom-popup'
           }
