@@ -77,9 +77,13 @@ export default function Cart({ isOpen, onClose }) {
       let totalExtraExtras = 0
       
       cartItems.forEach(item => {
-        // Extra por leche deslactosada o de almendras ($15 por producto con leche)
-        if (item.tipoLeche && (item.tipoLeche === 'deslactosada' || item.tipoLeche === 'almendras')) {
-          totalExtraLeche += 15 * item.quantity
+        // Extra por leche deslactosada ($15) o de almendras ($20) por producto con leche
+        if (item.tipoLeche) {
+          if (item.tipoLeche === 'deslactosada') {
+            totalExtraLeche += 15 * item.quantity
+          } else if (item.tipoLeche === 'almendras') {
+            totalExtraLeche += 20 * item.quantity
+          }
         }
         
         // Extra por extras ($20 por cada extra, multiplicado por cantidad)
@@ -164,9 +168,13 @@ export default function Cart({ isOpen, onClose }) {
   const calculateItemTotal = (item) => {
     let total = item.price * item.quantity
     
-    // Extra por leche deslactosada o de almendras ($15 por producto)
-    if (item.tipoLeche && (item.tipoLeche === 'deslactosada' || item.tipoLeche === 'almendras')) {
-      total += 15 * item.quantity
+    // Extra por leche deslactosada ($15) o de almendras ($20) por producto
+    if (item.tipoLeche) {
+      if (item.tipoLeche === 'deslactosada') {
+        total += 15 * item.quantity
+      } else if (item.tipoLeche === 'almendras') {
+        total += 20 * item.quantity
+      }
     }
     
     // Extra por extras ($20 por cada extra, multiplicado por cantidad)
