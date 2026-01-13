@@ -31,6 +31,19 @@ export default function CheckoutModal({ isOpen, onClose, onConfirm, cartItems })
     return total
   }
   
+  // Calcular extra por proteína
+  const calcularExtraProteina = () => {
+    let total = 0
+    cartItems.forEach(item => {
+      if (item.tipoProteina === 'normal') {
+        total += 30 * item.quantity
+      } else if (item.tipoProteina === 'isolatada') {
+        total += 35 * item.quantity
+      }
+    })
+    return total
+  }
+  
   // Calcular extra por extras seleccionados por item
   const calcularExtraExtras = () => {
     let total = 0
@@ -47,7 +60,8 @@ export default function CheckoutModal({ isOpen, onClose, onConfirm, cartItems })
   const baseTotal = getTotal()
   const extraLeche = calcularExtraLeche()
   const extraExtras = calcularExtraExtras()
-  const totalFinal = baseTotal + extraLeche + extraExtras
+  const extraProteina = calcularExtraProteina()
+  const totalFinal = baseTotal + extraLeche + extraExtras + extraProteina
   
   useEffect(() => {
     // Resetear formulario cuando se abre el modal
@@ -84,7 +98,7 @@ export default function CheckoutModal({ isOpen, onClose, onConfirm, cartItems })
       tipo_leche: null, // Ya no se usa globalmente, está en cada item
       extra_leche: extraLeche > 0 ? extraLeche : 0,
       extras: [], // Ya no se usa globalmente, está en cada item
-      extra_extras: extraExtras > 0 ? extraExtras : 0
+      extra_extras: (extraExtras + extraProteina) > 0 ? (extraExtras + extraProteina) : 0
     }
     
     onConfirm(checkoutData, totalFinal)
@@ -281,7 +295,7 @@ export default function CheckoutModal({ isOpen, onClose, onConfirm, cartItems })
                             <div>• Extras: {getNombresExtras(item.extras).join(', ')} (+${item.extras.length * 20} c/u)</div>
                           )}
                           {item.tipoProteina && (
-                            <div>• Scoop: {item.tipoProteina === 'proteina' ? 'Proteína' : 'Creatina'}</div>
+                            <div>• Proteína: {item.tipoProteina === 'isolatada' ? 'Proteína Isolatada' : 'Proteína Normal'} (+${item.tipoProteina === 'isolatada' ? '35' : '30'})</div>
                           )}
                         </div>
                       )}
@@ -353,6 +367,14 @@ export default function CheckoutModal({ isOpen, onClose, onConfirm, cartItems })
                       Extras:
                     </span>
                     <span style={{ fontWeight: 600 }}>+${extraExtras.toFixed(2)}</span>
+                  </div>
+                )}
+                {extraProteina > 0 && (
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <span style={{ color: 'var(--text-light)' }}>
+                      Proteína:
+                    </span>
+                    <span style={{ fontWeight: 600 }}>+${extraProteina.toFixed(2)}</span>
                   </div>
                 )}
                 <div 

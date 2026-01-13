@@ -76,7 +76,7 @@ export const CartProvider = ({ children }) => {
         tipoPreparacion: tipoPreparacion, // 'heladas' o 'frapeadas' para bebidas frías
         tipoLeche: tipoLeche, // 'entera', 'deslactosada', 'almendras' o null
         extras: extras && extras.length > 0 ? [...extras] : [], // Array de IDs de extras
-        tipoProteina: tipoProteina, // 'proteina' o 'creatina' o null
+        tipoProteina: tipoProteina, // 'normal' o 'isolatada' o null
         categoria: product.categoria || product.categoria_id || null, // Guardar categoría directamente
         lleva_leche: Boolean(product.lleva_leche === true || product.lleva_leche === 1), // Guardar lleva_leche directamente
         lleva_extras: Boolean(product.lleva_extras === true || product.lleva_extras === 1), // Guardar lleva_extras directamente
