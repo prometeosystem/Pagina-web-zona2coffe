@@ -133,7 +133,7 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
   const [precioUnicoSeleccionado, setPrecioUnicoSeleccionado] = useState(false) // Para productos con un solo precio
   const [tipoLeche, setTipoLeche] = useState('entera') // 'entera', 'deslactosada', 'almendras'
   const [extrasSeleccionados, setExtrasSeleccionados] = useState([]) // Array de IDs de extras
-  const [tipoProteina, setTipoProteina] = useState(null) // 'proteina' o 'creatina'
+  const [tipoProteina, setTipoProteina] = useState(null) // 'normal' o 'isolatada'
   
   // Obtener los tamaños disponibles, ordenados (M primero, luego G) - DEBE IR ANTES DE USAR sizes
   const sizes = Object.keys(item.sizes || {}).sort((a, b) => {
@@ -566,45 +566,45 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
             </div>
           )}
           
-          {/* Selector de Proteína/Creatina (solo se muestra si el producto lleva proteína y hay un tamaño/precio seleccionado) */}
+          {/* Selector de Proteína (solo se muestra si el producto lleva proteína y hay un tamaño/precio seleccionado) */}
           {llevaProteina && (
             (hasMultipleSizes && selectedSize) || 
             (!hasMultipleSizes && precioUnicoSeleccionado)
           ) && (
             <div className="mb-3">
-              <p className="small text-muted mb-2" style={{fontWeight: 500}}>Scoop:</p>
+              <p className="small text-muted mb-2" style={{fontWeight: 500}}>Proteína:</p>
               <div className="d-flex gap-2 flex-wrap">
                 <button
                   type="button"
-                  onClick={() => setTipoProteina('proteina')}
-                  className={`btn ${tipoProteina === 'proteina' ? 'btn-success' : 'btn-outline-success'}`}
+                  onClick={() => setTipoProteina('normal')}
+                  className={`btn ${tipoProteina === 'normal' ? 'btn-success' : 'btn-outline-success'}`}
                   style={{
                     flex: '1 1 calc(50% - 0.5rem)',
                     minWidth: '100px',
                     fontSize: '0.875rem',
-                    fontWeight: tipoProteina === 'proteina' ? 600 : 400,
+                    fontWeight: tipoProteina === 'normal' ? 600 : 400,
                     transition: 'all 0.2s',
-                    borderWidth: tipoProteina === 'proteina' ? '2px' : '1px',
+                    borderWidth: tipoProteina === 'normal' ? '2px' : '1px',
                     padding: '0.5rem 0.75rem'
                   }}
                 >
-                  Proteína
+                  Normal (+$30)
                 </button>
                 <button
                   type="button"
-                  onClick={() => setTipoProteina('creatina')}
-                  className={`btn ${tipoProteina === 'creatina' ? 'btn-success' : 'btn-outline-success'}`}
+                  onClick={() => setTipoProteina('isolatada')}
+                  className={`btn ${tipoProteina === 'isolatada' ? 'btn-success' : 'btn-outline-success'}`}
                   style={{
                     flex: '1 1 calc(50% - 0.5rem)',
                     minWidth: '100px',
                     fontSize: '0.875rem',
-                    fontWeight: tipoProteina === 'creatina' ? 600 : 400,
+                    fontWeight: tipoProteina === 'isolatada' ? 600 : 400,
                     transition: 'all 0.2s',
-                    borderWidth: tipoProteina === 'creatina' ? '2px' : '1px',
+                    borderWidth: tipoProteina === 'isolatada' ? '2px' : '1px',
                     padding: '0.5rem 0.75rem'
                   }}
                 >
-                  Creatina
+                  Isolatada (+$35)
                 </button>
               </div>
             </div>
@@ -765,7 +765,7 @@ export default function MenuPage({ onClose, onCartClick, isCartOpen }){
         <section id="bebidas-proteina" className="mb-5 menu-section" data-aos="fade-up">
           <div className="section-header-wrapper mb-4">
             <h2 className="menu-section-title">
-              Elige tu bebida con scoop de proteína ó creatina
+              Elige tu bebida con scoop de proteína normal o proteína isolatada
             </h2>
           </div>
           <div className="row g-4">

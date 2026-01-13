@@ -61,7 +61,8 @@ export default function Cart({ isOpen, onClose }) {
         
         // Agregar tipo de proteína si existe
         if (item.tipoProteina) {
-          observaciones.push(`Scoop: ${item.tipoProteina === 'proteina' ? 'Proteína' : 'Creatina'}`)
+          const nombreProteina = item.tipoProteina === 'isolatada' ? 'Proteína Isolatada' : 'Proteína Normal'
+          observaciones.push(`Proteína: ${nombreProteina}`)
         }
         
         return {
@@ -75,6 +76,7 @@ export default function Cart({ isOpen, onClose }) {
       // Calcular totales de extras y leche por item
       let totalExtraLeche = 0
       let totalExtraExtras = 0
+      let totalExtraProteina = 0
       
       cartItems.forEach(item => {
         // Extra por leche deslactosada ($15) o de almendras ($20) por producto con leche
@@ -90,6 +92,13 @@ export default function Cart({ isOpen, onClose }) {
         if (item.extras && item.extras.length > 0) {
           totalExtraExtras += item.extras.length * 20 * item.quantity
         }
+
+        // Extra por proteína
+        if (item.tipoProteina === 'normal') {
+          totalExtraProteina += 30 * item.quantity
+        } else if (item.tipoProteina === 'isolatada') {
+          totalExtraProteina += 35 * item.quantity
+        }
       })
 
       // Crear la pre-orden con todos los datos
@@ -100,7 +109,7 @@ export default function Cart({ isOpen, onClose }) {
         comentarios: checkoutData.comentarios,
         tipo_leche: null, // Ya no se usa globalmente, está en cada item
         extra_leche: totalExtraLeche,
-        extra_extras: totalExtraExtras
+        extra_extras: totalExtraExtras + totalExtraProteina
       }
 
       // Llamar al endpoint con el formato correcto
@@ -180,6 +189,13 @@ export default function Cart({ isOpen, onClose }) {
     // Extra por extras ($20 por cada extra, multiplicado por cantidad)
     if (item.extras && item.extras.length > 0) {
       total += item.extras.length * 20 * item.quantity
+    }
+
+    // Extra por proteína
+    if (item.tipoProteina === 'normal') {
+      total += 30 * item.quantity
+    } else if (item.tipoProteina === 'isolatada') {
+      total += 35 * item.quantity
     }
     
     return total
@@ -370,7 +386,7 @@ export default function Cart({ isOpen, onClose }) {
                             borderRadius: '9999px',
                             fontWeight: 500
                           }}>
-                            Scoop: {item.tipoProteina === 'proteina' ? 'Proteína' : 'Creatina'}
+                            Proteína: {item.tipoProteina === 'isolatada' ? 'Proteína Isolatada' : 'Proteína Normal'}
                           </span>
                         )}
                       </div>
