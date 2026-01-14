@@ -4,6 +4,14 @@ import { createPreorden } from '../services/api'
 import CheckoutModal from './CheckoutModal'
 import Swal from 'sweetalert2'
 
+// Opciones de extras disponibles (solo para uso en checkout)
+const extrasOpciones = [
+  { id: 'tocino', nombre: 'Tocino', precio: 20 },
+  { id: 'huevo', nombre: 'Huevo', precio: 20 },
+  { id: 'jamon', nombre: 'Jamón', precio: 20 },
+  { id: 'chorizo', nombre: 'Chorizo', precio: 20 }
+]
+
 export default function Cart({ isOpen, onClose }) {
   const { cartItems, removeFromCart, updateQuantity, clearCart, getTotal, getTotalItems } = useCart()
   const [isProcessing, setIsProcessing] = useState(false)
@@ -23,48 +31,106 @@ export default function Cart({ isOpen, onClose }) {
     setShowCheckoutModal(false)
 
     try {
-      // Preparar los detalles con observaciones si hay comentarios o tipo de leche
+      // Preparar los detalles con observaciones si hay comentarios, tipo de leche, tipo de preparación o extras
+      // Ahora cada item tiene su propio tipo de leche y extras
       const detalles = cartItems.map(item => {
         const observaciones = []
         
-        // Agregar tipo de leche si es bebida
-        if (checkoutData.tipo_leche && checkoutData.tipo_leche === 'deslactosada') {
-          observaciones.push('Leche deslactosada')
+        // Agregar tipo de preparación si es bebida fría
+        if (item.tipoPreparacion) {
+          observaciones.push(`Preparación: ${item.tipoPreparacion === 'heladas' ? 'Frío' : 'Frapeadas'}`)
         }
         
-        // Agregar comentarios generales si existen
-        if (checkoutData.comentarios) {
-          observaciones.push(checkoutData.comentarios)
+        // Agregar tipo de leche del item (individual)
+        if (item.tipoLeche && item.tipoLeche !== 'entera') {
+          if (item.tipoLeche === 'deslactosada') {
+            observaciones.push('Leche deslactosada')
+          } else if (item.tipoLeche === 'almendras') {
+            observaciones.push('Leche de almendras')
+          }
+        }
+        
+        // Agregar extras del item (individuales)
+        if (item.extras && item.extras.length > 0) {
+          const nombresExtras = item.extras.map(extraId => {
+            const extra = extrasOpciones.find(e => e.id === extraId)
+            return extra ? extra.nombre : extraId
+          })
+          observaciones.push(`Extras: ${nombresExtras.join(', ')}`)
+        }
+        
+        // Agregar tipo de proteína si existe
+        if (item.tipoProteina) {
+          const nombreProteina = item.tipoProteina === 'isolatada' ? 'Proteína Isolatada' : 'Proteína Normal'
+          observaciones.push(`Proteína: ${nombreProteina}`)
         }
         
         return {
           id_producto: item.productId,
           cantidad: item.quantity,
-          observaciones: observaciones.length > 0 ? observaciones.join(' - ') : null
+          observaciones: observaciones.length > 0 ? observaciones.join(' - ') : null,
+          tipo_preparacion: item.tipoPreparacion || null
+        }
+      })
+      
+      // Calcular totales de extras y leche por item
+      let totalExtraLeche = 0
+      let totalExtraExtras = 0
+      let totalExtraProteina = 0
+      
+      cartItems.forEach(item => {
+        // Extra por leche deslactosada ($15) o de almendras ($20) por producto con leche
+        if (item.tipoLeche) {
+          if (item.tipoLeche === 'deslactosada') {
+            totalExtraLeche += 15 * item.quantity
+          } else if (item.tipoLeche === 'almendras') {
+            totalExtraLeche += 20 * item.quantity
+          }
+        }
+        
+        // Extra por extras ($20 por cada extra, multiplicado por cantidad)
+        if (item.extras && item.extras.length > 0) {
+          totalExtraExtras += item.extras.length * 20 * item.quantity
+        }
+
+        // Extra por proteína
+        if (item.tipoProteina === 'normal') {
+          totalExtraProteina += 30 * item.quantity
+        } else if (item.tipoProteina === 'isolatada') {
+          totalExtraProteina += 35 * item.quantity
         }
       })
 
       // Crear la pre-orden con todos los datos
+      // El tipo de leche ahora se maneja por item individualmente, pero mantenemos el campo para compatibilidad
       const preordenData = {
         nombre_cliente: checkoutData.nombre_cliente,
         tipo_servicio: checkoutData.tipo_servicio,
         comentarios: checkoutData.comentarios,
-        tipo_leche: checkoutData.tipo_leche,
-        extra_leche: checkoutData.extra_leche
+        tipo_leche: null, // Ya no se usa globalmente, está en cada item
+        extra_leche: totalExtraLeche,
+        extra_extras: totalExtraExtras + totalExtraProteina
       }
 
       // Llamar al endpoint con el formato correcto
       const result = await createPreorden(preordenData, detalles)
 
+      // Debug: Log la respuesta del backend para ver qué está retornando
+      console.log('Respuesta del backend:', result)
+
       // El backend retorna: { message, id_preorden, total }
-      if (result && (result.id_preorden || result.id)) {
+      // Verificar si tiene id_preorden o id (por compatibilidad)
+      const idPreorden = result?.id_preorden || result?.id || result?.id_preorden_id
+      
+      if (result && idPreorden) {
         // Mostrar SweetAlert de éxito
         await Swal.fire({
           icon: 'success',
-          title: '¡Pedido Creado Exitosamente!',
-          text: 'Favor de pasar a barra a pagar',
-          confirmButtonColor: 'var(--matcha-500)',
-          confirmButtonText: 'Entendido',
+          title: 'Favor de pasar a barra a pagar',
+          html: '<p style="color: red; margin-top: 1rem;">Tu pedido comenzará a prepararse después de pagar</p>',
+          showConfirmButton: false,
+          allowOutsideClick: true,
+          allowEscapeKey: false,
           customClass: {
             popup: 'swal-custom-popup'
           }
@@ -74,7 +140,14 @@ export default function Cart({ isOpen, onClose }) {
         clearCart()
         onClose()
       } else {
-        throw new Error('No se recibió un ID de pre-orden válido')
+        // Log más detallado del error
+        console.error('Respuesta inválida del backend:', {
+          result,
+          tieneIdPreorden: !!result?.id_preorden,
+          tieneId: !!result?.id,
+          keys: result ? Object.keys(result) : 'result es null/undefined'
+        })
+        throw new Error(`No se recibió un ID de pre-orden válido. Respuesta: ${JSON.stringify(result)}`)
       }
     } catch (error) {
       console.error('Error en checkout:', error)
@@ -98,6 +171,39 @@ export default function Cart({ isOpen, onClose }) {
       currency: 'MXN',
       minimumFractionDigits: 2
     }).format(price)
+  }
+
+  // Calcular el total de un item incluyendo extras y tipo de leche
+  const calculateItemTotal = (item) => {
+    let total = item.price * item.quantity
+    
+    // Extra por leche deslactosada ($15) o de almendras ($20) por producto
+    if (item.tipoLeche) {
+      if (item.tipoLeche === 'deslactosada') {
+        total += 15 * item.quantity
+      } else if (item.tipoLeche === 'almendras') {
+        total += 20 * item.quantity
+      }
+    }
+    
+    // Extra por extras ($20 por cada extra, multiplicado por cantidad)
+    if (item.extras && item.extras.length > 0) {
+      total += item.extras.length * 20 * item.quantity
+    }
+
+    // Extra por proteína
+    if (item.tipoProteina === 'normal') {
+      total += 30 * item.quantity
+    } else if (item.tipoProteina === 'isolatada') {
+      total += 35 * item.quantity
+    }
+    
+    return total
+  }
+
+  // Calcular el total del carrito incluyendo todos los extras
+  const calculateCartTotal = () => {
+    return cartItems.reduce((total, item) => total + calculateItemTotal(item), 0)
   }
 
   if (!isOpen) return null
@@ -219,16 +325,71 @@ export default function Cart({ isOpen, onClose }) {
                       <h6 style={{ margin: 0, fontWeight: 600, fontSize: '1rem', color: 'var(--text)' }}>
                         {item.name}
                       </h6>
-                      {item.size && (
-                        <span className="badge" style={{ 
-                          background: 'var(--matcha-100)', 
-                          color: 'var(--matcha-700)',
-                          fontSize: '0.75rem',
-                          marginTop: '0.25rem'
-                        }}>
-                          Tamaño: {item.size}
-                        </span>
-                      )}
+                      <div className="d-flex flex-wrap gap-2" style={{ marginTop: '0.25rem' }}>
+                        {item.size && (
+                          <span className="badge" style={{ 
+                            background: 'var(--matcha-100)', 
+                            color: 'var(--matcha-700)',
+                            fontSize: '0.75rem',
+                            padding: '0.25rem 0.5rem',
+                            borderRadius: '9999px',
+                            fontWeight: 500
+                          }}>
+                            Tamaño: {item.size}
+                          </span>
+                        )}
+                        {item.tipoPreparacion && (
+                          <span className="badge" style={{ 
+                            background: 'var(--coffee-100)', 
+                            color: 'var(--coffee-700)',
+                            fontSize: '0.75rem',
+                            padding: '0.25rem 0.5rem',
+                            borderRadius: '9999px',
+                            fontWeight: 500
+                          }}>
+                            {item.tipoPreparacion === 'heladas' ? 'Frío' : 'Frapeadas'}
+                          </span>
+                        )}
+                        {item.tipoLeche && item.tipoLeche !== 'entera' && (
+                          <span className="badge" style={{ 
+                            background: '#dbeafe', 
+                            color: '#1e40af',
+                            fontSize: '0.75rem',
+                            padding: '0.25rem 0.5rem',
+                            borderRadius: '9999px',
+                            fontWeight: 500
+                          }}>
+                            Leche: {item.tipoLeche === 'deslactosada' ? 'Deslactosada' : item.tipoLeche === 'almendras' ? 'Almendras' : item.tipoLeche}
+                          </span>
+                        )}
+                        {item.extras && item.extras.length > 0 && (
+                          <span className="badge" style={{ 
+                            background: '#f3e8ff', 
+                            color: '#6b21a8',
+                            fontSize: '0.75rem',
+                            padding: '0.25rem 0.5rem',
+                            borderRadius: '9999px',
+                            fontWeight: 500
+                          }}>
+                            Extras: {item.extras.map(extraId => {
+                              const extra = extrasOpciones.find(e => e.id === extraId)
+                              return extra ? extra.nombre : extraId
+                            }).join(', ')}
+                          </span>
+                        )}
+                        {item.tipoProteina && (
+                          <span className="badge" style={{ 
+                            background: '#fef3c7', 
+                            color: '#92400e',
+                            fontSize: '0.75rem',
+                            padding: '0.25rem 0.5rem',
+                            borderRadius: '9999px',
+                            fontWeight: 500
+                          }}>
+                            Proteína: {item.tipoProteina === 'isolatada' ? 'Proteína Isolatada' : 'Proteína Normal'}
+                          </span>
+                        )}
+                      </div>
                       <p style={{ 
                         margin: '0.5rem 0 0 0', 
                         fontSize: '0.875rem', 
@@ -300,7 +461,7 @@ export default function Cart({ isOpen, onClose }) {
                       </button>
                     </div>
                     <strong className="cart-item-price" style={{ fontSize: '1.125rem', color: 'var(--matcha-600)' }}>
-                      {formatPrice(item.price * item.quantity)}
+                      {formatPrice(calculateItemTotal(item))}
                     </strong>
                   </div>
                 </div>
@@ -338,7 +499,7 @@ export default function Cart({ isOpen, onClose }) {
             <div className="d-flex justify-content-between align-items-center mb-3">
               <strong style={{ fontSize: '1.25rem', color: 'var(--text)' }}>Total:</strong>
               <strong style={{ fontSize: '1.5rem', color: 'var(--matcha-600)' }}>
-                {formatPrice(getTotal())}
+                {formatPrice(calculateCartTotal())}
               </strong>
             </div>
             

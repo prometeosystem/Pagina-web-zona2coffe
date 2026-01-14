@@ -1,38 +1,67 @@
 import React, { useState, useEffect } from 'react'
 import { useCart } from '../context/CartContext'
 
+// Opciones de extras disponibles
+const extrasOpciones = [
+  { id: 'tocino', nombre: 'Tocino', precio: 20 },
+  { id: 'huevo', nombre: 'Huevo', precio: 20 },
+  { id: 'jamon', nombre: 'Jamón', precio: 20 },
+  { id: 'chorizo', nombre: 'Chorizo', precio: 20 }
+]
+
 export default function CheckoutModal({ isOpen, onClose, onConfirm, cartItems }) {
   const { getTotal } = useCart()
   const [nombreCliente, setNombreCliente] = useState('')
   const [tipoServicio, setTipoServicio] = useState('comer-aqui') // 'comer-aqui' o 'para-llevar'
   const [comentarios, setComentarios] = useState('')
-  const [tipoLeche, setTipoLeche] = useState('entera') // 'entera' o 'deslactosada'
   
-  // Detectar si hay bebidas en el carrito
-  const categoriasBebidas = [
-    'Bebidas Calientes',
-    'Bebidas Frías',
-    'bebidas calientes',
-    'bebidas frías',
-    'bebidas frias',
-    'Shots de Energía',
-    'shots de energía',
-    'Bebidas con Proteína',
-    'bebidas con proteína',
-    'bebidas con proteina'
-  ]
+  // Calcular extras y tipo de leche por item individualmente
+  const calcularExtraLeche = () => {
+    let total = 0
+    cartItems.forEach(item => {
+      // Extra por leche deslactosada ($15) o de almendras ($20) por producto con leche
+      if (item.tipoLeche) {
+        if (item.tipoLeche === 'deslactosada') {
+          total += 15 * item.quantity
+        } else if (item.tipoLeche === 'almendras') {
+          total += 20 * item.quantity
+        }
+      }
+    })
+    return total
+  }
   
-  const tieneBebidas = cartItems.some(item => {
-    const categoria = item.originalProduct?.categoria || item.categoria || ''
-    return categoriasBebidas.some(cat => 
-      categoria.toLowerCase().includes(cat.toLowerCase())
-    )
-  })
+  // Calcular extra por proteína
+  const calcularExtraProteina = () => {
+    let total = 0
+    cartItems.forEach(item => {
+      if (item.tipoProteina === 'normal') {
+        total += 30 * item.quantity
+      } else if (item.tipoProteina === 'isolatada') {
+        total += 35 * item.quantity
+      }
+    })
+    return total
+  }
   
-  // Calcular total con extra por leche deslactosada
+  // Calcular extra por extras seleccionados por item
+  const calcularExtraExtras = () => {
+    let total = 0
+    cartItems.forEach(item => {
+      // Extra por extras ($20 por cada extra, multiplicado por cantidad)
+      if (item.extras && item.extras.length > 0) {
+        total += item.extras.length * 20 * item.quantity
+      }
+    })
+    return total
+  }
+  
+  // Calcular total con extra por leche deslactosada y extras
   const baseTotal = getTotal()
-  const extraLeche = tieneBebidas && tipoLeche === 'deslactosada' ? 15 : 0
-  const totalFinal = baseTotal + extraLeche
+  const extraLeche = calcularExtraLeche()
+  const extraExtras = calcularExtraExtras()
+  const extraProteina = calcularExtraProteina()
+  const totalFinal = baseTotal + extraLeche + extraExtras + extraProteina
   
   useEffect(() => {
     // Resetear formulario cuando se abre el modal
@@ -40,9 +69,24 @@ export default function CheckoutModal({ isOpen, onClose, onConfirm, cartItems })
       setNombreCliente('')
       setTipoServicio('comer-aqui')
       setComentarios('')
-      setTipoLeche('entera')
     }
   }, [isOpen])
+  
+  // Función para obtener el nombre del tipo de leche
+  const getNombreTipoLeche = (tipoLeche) => {
+    if (tipoLeche === 'deslactosada') return 'Deslactosada'
+    if (tipoLeche === 'almendras') return 'Almendras'
+    return 'Entera'
+  }
+  
+  // Función para obtener nombres de extras
+  const getNombresExtras = (extrasIds) => {
+    if (!extrasIds || extrasIds.length === 0) return []
+    return extrasIds.map(id => {
+      const extra = extrasOpciones.find(e => e.id === id)
+      return extra ? extra.nombre : id
+    })
+  }
   
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -51,8 +95,10 @@ export default function CheckoutModal({ isOpen, onClose, onConfirm, cartItems })
       nombre_cliente: nombreCliente.trim() || null,
       tipo_servicio: tipoServicio,
       comentarios: comentarios.trim() || null,
-      tipo_leche: tieneBebidas ? tipoLeche : null,
-      extra_leche: extraLeche
+      tipo_leche: null, // Ya no se usa globalmente, está en cada item
+      extra_leche: extraLeche > 0 ? extraLeche : 0,
+      extras: [], // Ya no se usa globalmente, está en cada item
+      extra_extras: (extraExtras + extraProteina) > 0 ? (extraExtras + extraProteina) : 0
     }
     
     onConfirm(checkoutData, totalFinal)
@@ -218,58 +264,45 @@ export default function CheckoutModal({ isOpen, onClose, onConfirm, cartItems })
                 </div>
               </div>
               
-              {/* Tipo de Leche (solo si hay bebidas) */}
-              {tieneBebidas && (
-                <div className="mb-4">
-                  <label 
-                    style={{
-                      display: 'block',
-                      marginBottom: '0.5rem',
-                      fontWeight: 600,
-                      color: 'var(--text)',
-                      fontSize: '0.9375rem'
-                    }}
-                  >
-                    Tipo de Leche
-                  </label>
-                  <div className="d-flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setTipoLeche('entera')}
-                      style={{
-                        flex: 1,
-                        padding: '0.75rem',
-                        borderRadius: 'var(--radius)',
-                        border: `2px solid ${tipoLeche === 'entera' ? 'var(--matcha-500)' : 'var(--gray-300)'}`,
-                        background: tipoLeche === 'entera' ? 'var(--matcha-100)' : 'transparent',
-                        color: tipoLeche === 'entera' ? 'var(--matcha-700)' : 'var(--text)',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        transition: 'all 0.2s'
-                      }}
-                    >
-                      Entera
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setTipoLeche('deslactosada')}
-                      style={{
-                        flex: 1,
-                        padding: '0.75rem',
-                        borderRadius: 'var(--radius)',
-                        border: `2px solid ${tipoLeche === 'deslactosada' ? 'var(--matcha-500)' : 'var(--gray-300)'}`,
-                        background: tipoLeche === 'deslactosada' ? 'var(--matcha-100)' : 'transparent',
-                        color: tipoLeche === 'deslactosada' ? 'var(--matcha-700)' : 'var(--text)',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        transition: 'all 0.2s'
-                      }}
-                    >
-                      Deslactosada (+$15)
-                    </button>
-                  </div>
+              {/* Resumen de productos con sus opciones */}
+              <div className="mb-4">
+                <label 
+                  style={{
+                    display: 'block',
+                    marginBottom: '0.75rem',
+                    fontWeight: 600,
+                    color: 'var(--text)',
+                    fontSize: '0.9375rem'
+                  }}
+                >
+                  Resumen del Pedido
+                </label>
+                <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid var(--gray-300)', borderRadius: 'var(--radius)', padding: '0.75rem' }}>
+                  {cartItems.map((item, index) => (
+                    <div key={item.id || index} style={{ marginBottom: index < cartItems.length - 1 ? '0.75rem' : 0, paddingBottom: index < cartItems.length - 1 ? '0.75rem' : 0, borderBottom: index < cartItems.length - 1 ? '1px solid var(--gray-200)' : 'none' }}>
+                      <div style={{ fontWeight: 600, fontSize: '0.875rem', marginBottom: '0.25rem' }}>
+                        {item.name} {item.size && `(${item.size})`} x{item.quantity}
+                      </div>
+                      {(item.tipoPreparacion || item.tipoLeche || (item.extras && item.extras.length > 0) || item.tipoProteina) && (
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-light)', marginLeft: '0.5rem' }}>
+                          {item.tipoPreparacion && (
+                            <div>• Preparación: {item.tipoPreparacion === 'heladas' ? 'Frío' : 'Frapeadas'}</div>
+                          )}
+                          {item.tipoLeche && item.tipoLeche !== 'entera' && (
+                            <div>• Leche: {getNombreTipoLeche(item.tipoLeche)} (+${item.tipoLeche === 'almendras' ? '20' : '15'})</div>
+                          )}
+                          {item.extras && item.extras.length > 0 && (
+                            <div>• Extras: {getNombresExtras(item.extras).join(', ')} (+${item.extras.length * 20} c/u)</div>
+                          )}
+                          {item.tipoProteina && (
+                            <div>• Proteína: {item.tipoProteina === 'isolatada' ? 'Proteína Isolatada' : 'Proteína Normal'} (+${item.tipoProteina === 'isolatada' ? '35' : '30'})</div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
-              )}
+              </div>
               
               {/* Comentarios */}
               <div className="mb-4">
@@ -320,10 +353,28 @@ export default function CheckoutModal({ isOpen, onClose, onConfirm, cartItems })
                   <span style={{ color: 'var(--text-light)' }}>Subtotal:</span>
                   <span style={{ fontWeight: 600 }}>${baseTotal.toFixed(2)}</span>
                 </div>
-                {tieneBebidas && tipoLeche === 'deslactosada' && (
+                {extraLeche > 0 && (
                   <div className="d-flex justify-content-between align-items-center mb-2">
-                    <span style={{ color: 'var(--text-light)' }}>Leche Deslactosada:</span>
-                    <span style={{ fontWeight: 600 }}>+$15.00</span>
+                    <span style={{ color: 'var(--text-light)' }}>
+                      Extra por leche especial:
+                    </span>
+                    <span style={{ fontWeight: 600 }}>+${extraLeche.toFixed(2)}</span>
+                  </div>
+                )}
+                {extraExtras > 0 && (
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <span style={{ color: 'var(--text-light)' }}>
+                      Extras:
+                    </span>
+                    <span style={{ fontWeight: 600 }}>+${extraExtras.toFixed(2)}</span>
+                  </div>
+                )}
+                {extraProteina > 0 && (
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <span style={{ color: 'var(--text-light)' }}>
+                      Proteína:
+                    </span>
+                    <span style={{ fontWeight: 600 }}>+${extraProteina.toFixed(2)}</span>
                   </div>
                 )}
                 <div 
@@ -371,4 +422,7 @@ export default function CheckoutModal({ isOpen, onClose, onConfirm, cartItems })
     </>
   )
 }
+
+
+
 
