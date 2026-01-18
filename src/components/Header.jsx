@@ -99,9 +99,7 @@ export default function Header({ onMenuClick }){
               <li className="nav-item me-2">
                 <a className="nav-link header-btn menu-pill" href="#menu" onClick={handleMenuClick}>Menú</a>
               </li>
-              <li className="nav-item me-2">
-                <a className="nav-link header-btn" href="#nosotros" onClick={handleNosotrosClick}>Nosotros</a>
-              </li>
+              
               <li className="nav-item me-2">
                 <a className="nav-link header-btn" href="#ubicacion" onClick={handleLocationClick}>Ubicación</a>
               </li>
