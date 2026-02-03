@@ -1745,7 +1745,7 @@ img[src] {
 .menu-page {
   min-height: 100vh;
   background: linear-gradient(180deg, var(--bg) 0%, rgba(250, 247, 237, 0.5) 100%);
-  padding-top: 3rem;
+  padding-top: 1rem;
   padding-bottom: 4rem;
 }
 
@@ -1782,6 +1782,56 @@ img[src] {
   width: 80px;
   height: 3px;
   background: var(--coffee-500);
+}
+
+/* =========================
+   Menu Page - Loader a pantalla completa
+   ========================= */
+
+.menu-page-loader-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(250, 247, 237, 0.98);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  pointer-events: auto;
+}
+
+.menu-page-loader-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+}
+
+.menu-page-loader-spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid rgba(20, 108, 67, 0.2);
+  border-top-color: var(--matcha-600, #146C43);
+  border-radius: 50%;
+  animation: menu-page-loader-spin 0.9s linear infinite;
+}
+
+@keyframes menu-page-loader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.menu-page-loader-text {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--coffee-600, #5d4037);
 }
 
 /* =========================
@@ -2023,7 +2073,7 @@ img[src] {
 /* Responsive: Menu Page */
 @media (max-width: 991px) {
   .menu-page {
-    padding-top: 2rem;
+    padding-top: 4rem;
     padding-bottom: 3rem;
   }
   
@@ -2059,7 +2109,7 @@ img[src] {
 
 @media (max-width: 767px) {
   .menu-page {
-    padding-top: 1.5rem;
+    padding-top: 1rem;
   }
   
   .menu-section {

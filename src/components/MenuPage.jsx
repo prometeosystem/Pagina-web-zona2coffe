@@ -724,9 +724,20 @@ export default function MenuPage({ onClose, onCartClick, isCartOpen }){
 
   return (
     <div className="menu-page">
-      <div className="container py-5">
+      {/* Loader a pantalla completa mientras cargan los productos */}
+      {loading && (
+        <div className="menu-page-loader-overlay" aria-live="polite" aria-busy="true">
+          <div className="menu-page-loader-content">
+            <div className="menu-page-loader-spinner" role="status" aria-label="Cargando menú">
+            </div>
+            <p className="menu-page-loader-text">Cargando menú...</p>
+          </div>
+        </div>
+      )}
+
+      <div className="container py-0">
         {/* Header sin botón volver */}
-        <div className="text-center mb-5">
+        <div className="text-center mb-1">
           <h1 className="display-4 menu-page-title" style={{fontSize: 'clamp(2.5rem, 6vw, 4rem)', fontWeight: 800, marginBottom: '1rem', background: 'linear-gradient(135deg, var(--matcha-600), var(--coffee-600))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text'}}>
             Menú Completo
           </h1>
