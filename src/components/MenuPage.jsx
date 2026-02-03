@@ -689,6 +689,13 @@ export default function MenuPage({ onClose, onCartClick, isCartOpen }){
     }
   }
 
+  // Al elegir una categoría desde el menú flotante: limpiar búsqueda y hacer scroll a la sección
+  const handleCategorySelectFromFloating = (sectionId) => {
+    setSearchQuery('')
+    // Pequeña demora para que React muestre las secciones por categoría antes de hacer scroll
+    setTimeout(() => scrollToSection(sectionId), 80)
+  }
+
   const categories = [
     { id: 'bebidas-calientes', name: 'Bebidas Calientes' },
     { id: 'bebidas-frias', name: 'Bebidas Frías' },
@@ -950,7 +957,7 @@ export default function MenuPage({ onClose, onCartClick, isCartOpen }){
       {/* Botón flotante del carrito */}
       <FloatingCartButton onClick={onCartClick} isCartOpen={isCartOpen} />
       {/* Botón flotante del menú de categorías */}
-      <FloatingMenuButton isCartOpen={isCartOpen} />
+      <FloatingMenuButton isCartOpen={isCartOpen} onCategorySelect={handleCategorySelectFromFloating} />
     </div>
   )
 }

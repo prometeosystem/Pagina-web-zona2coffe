@@ -11,7 +11,7 @@ const categories = [
   { id: 'otros', name: 'Otros' }
 ]
 
-export default function FloatingMenuButton({ isCartOpen }) {
+export default function FloatingMenuButton({ isCartOpen, onCategorySelect }) {
   const [isOpen, setIsOpen] = useState(false)
 
   // Cerrar el menú si el carrito se abre
@@ -26,18 +26,23 @@ export default function FloatingMenuButton({ isCartOpen }) {
     return null
   }
 
-  const scrollToSection = (sectionId) => {
-    const element = document.getElementById(sectionId)
-    if (element) {
-      const headerOffset = 100
-      const elementPosition = element.getBoundingClientRect().top
-      const offsetPosition = elementPosition + window.pageYOffset - headerOffset
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth'
-      })
-      setIsOpen(false)
+  const handleCategoryClick = (sectionId) => {
+    if (onCategorySelect) {
+      onCategorySelect(sectionId)
+    } else {
+      // Fallback si no se pasa callback (scroll directo)
+      const element = document.getElementById(sectionId)
+      if (element) {
+        const headerOffset = 100
+        const elementPosition = element.getBoundingClientRect().top
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        })
+      }
     }
+    setIsOpen(false)
   }
 
   return (
@@ -73,7 +78,7 @@ export default function FloatingMenuButton({ isCartOpen }) {
                 <button
                   key={category.id}
                   className="floating-menu-item"
-                  onClick={() => scrollToSection(category.id)}
+                  onClick={() => handleCategoryClick(category.id)}
                 >
                   <span className="floating-menu-bullet"></span>
                   <span className="floating-menu-text">{category.name}</span>
