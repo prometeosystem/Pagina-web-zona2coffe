@@ -18,6 +18,26 @@ const getSizeFromName = (name) => {
   return match ? match[1].toUpperCase() : null
 }
 
+// Normaliza texto para búsqueda (sin acentos, minúsculas)
+const normalizeForSearch = (text) => {
+  if (!text || typeof text !== 'string') return ''
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .trim()
+}
+
+// Indica si un item agrupado coincide con la búsqueda (nombre, descripción, categoría)
+const matchesSearch = (item, query) => {
+  if (!query || !query.trim()) return true
+  const q = normalizeForSearch(query)
+  const name = normalizeForSearch(item.baseName || '')
+  const desc = normalizeForSearch(item.description || '')
+  const cat = normalizeForSearch(item.categoria || '')
+  return name.includes(q) || desc.includes(q) || cat.includes(q)
+}
+
 // Función para agrupar productos por nombre base
 const groupProductsByName = (products) => {
   const grouped = new Map()
@@ -651,6 +671,7 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
 export default function MenuPage({ onClose, onCartClick, isCartOpen }){
   const { productsByCategory, loading, error } = useProductsByCategory()
   const [expandedImageId, setExpandedImageId] = useState(null)
+  const [searchQuery, setSearchQuery] = useState('')
   
   // Usar solo productos del backend
   const menuData = productsByCategory
@@ -668,6 +689,13 @@ export default function MenuPage({ onClose, onCartClick, isCartOpen }){
     }
   }
 
+  // Al elegir una categoría desde el menú flotante: limpiar búsqueda y hacer scroll a la sección
+  const handleCategorySelectFromFloating = (sectionId) => {
+    setSearchQuery('')
+    // Pequeña demora para que React muestre las secciones por categoría antes de hacer scroll
+    setTimeout(() => scrollToSection(sectionId), 80)
+  }
+
   const categories = [
     { id: 'bebidas-calientes', name: 'Bebidas Calientes' },
     { id: 'bebidas-frias', name: 'Bebidas Frías' },
@@ -679,32 +707,117 @@ export default function MenuPage({ onClose, onCartClick, isCartOpen }){
     { id: 'otros', name: 'Otros' }
   ]
 
+  // Cuando hay búsqueda: todos los productos que coinciden en una sola lista (sin dividir por categoría)
+  const isSearchActive = searchQuery.trim().length > 0
+  const allFilteredItems = isSearchActive
+    ? [
+        ...(menuData.bebidasCalientes?.length ? groupProductsByName(menuData.bebidasCalientes).filter(item => matchesSearch(item, searchQuery)) : []),
+        ...(menuData.bebidasFrias?.length ? groupProductsByName(menuData.bebidasFrias).filter(item => matchesSearch(item, searchQuery)) : []),
+        ...(menuData.shotsEnergia?.length ? groupProductsByName(menuData.shotsEnergia).filter(item => matchesSearch(item, searchQuery)) : []),
+        ...(menuData.bebidasProteina?.length ? groupProductsByName(menuData.bebidasProteina).filter(item => matchesSearch(item, searchQuery)) : []),
+        ...(menuData.menuDulce?.length ? groupProductsByName(menuData.menuDulce).filter(item => matchesSearch(item, searchQuery)) : []),
+        ...(menuData.menuSalado?.length ? groupProductsByName(menuData.menuSalado).filter(item => matchesSearch(item, searchQuery)) : []),
+        ...(menuData.ensaladas?.length ? groupProductsByName(menuData.ensaladas).filter(item => matchesSearch(item, searchQuery)) : []),
+        ...(menuData.otros?.length ? groupProductsByName(menuData.otros).filter(item => matchesSearch(item, searchQuery)) : [])
+      ]
+    : []
+
   return (
     <div className="menu-page">
-      <div className="container py-5">
+      {/* Loader a pantalla completa mientras cargan los productos */}
+      {loading && (
+        <div className="menu-page-loader-overlay" aria-live="polite" aria-busy="true">
+          <div className="menu-page-loader-content">
+            <div className="menu-page-loader-spinner" role="status" aria-label="Cargando menú">
+            </div>
+            <p className="menu-page-loader-text">Cargando menú...</p>
+          </div>
+        </div>
+      )}
+
+      <div className="container py-0">
         {/* Header sin botón volver */}
-        <div className="text-center mb-5">
+        <div className="text-center mb-1">
           <h1 className="display-4 menu-page-title" style={{fontSize: 'clamp(2.5rem, 6vw, 4rem)', fontWeight: 800, marginBottom: '1rem', background: 'linear-gradient(135deg, var(--matcha-600), var(--coffee-600))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text'}}>
             Menú Completo
           </h1>
           <p className="lead text-muted" style={{fontSize: '1.125rem'}}>Descubre nuestra variedad de sabores</p>
         </div>
 
-        {/* Botones de navegación rápida */}
-        <div className="menu-categories-nav mb-5" data-aos="fade-up">
-          <div className="menu-categories-wrapper">
-            {categories.map((category) => (
+        {/* Buscador */}
+        <div className="menu-search-wrapper mb-4" data-aos="fade-up">
+          <div className="menu-search-inner">
+            
+            <input
+              type="search"
+              placeholder="Buscar producto"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="menu-search-input"
+              aria-label="Buscar en el menú"
+            />
+            {searchQuery && (
               <button
-                key={category.id}
-                onClick={() => scrollToSection(category.id)}
-                className="btn menu-category-btn"
+                type="button"
+                className="menu-search-clear"
+                onClick={() => setSearchQuery('')}
+                aria-label="Limpiar búsqueda"
               >
-                {category.name}
+                ×
               </button>
-            ))}
+            )}
           </div>
         </div>
 
+        {/* Botones de navegación rápida (ocultos cuando hay búsqueda activa) */}
+        {!isSearchActive && (
+          <div className="menu-categories-nav mb-5" data-aos="fade-up">
+            <div className="menu-categories-wrapper">
+              {categories.map((category) => (
+                <button
+                  key={category.id}
+                  onClick={() => scrollToSection(category.id)}
+                  className="btn menu-category-btn"
+                >
+                  {category.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Con búsqueda activa: todos los resultados juntos en una sola sección */}
+        {isSearchActive && (
+          <section id="resultados-busqueda" className="mb-5 menu-section" data-aos="fade-up">
+            <div className="section-header-wrapper mb-4">
+              <h2 className="menu-section-title">
+                Resultados para &quot;{searchQuery.trim()}&quot;
+              </h2>
+            </div>
+            <div className="row g-4">
+              {loading ? (
+                <div className="col-12 text-center py-5">
+                  <div className="spinner-border" style={{color: 'var(--matcha-600)'}} role="status">
+                    <span className="visually-hidden">Cargando...</span>
+                  </div>
+                </div>
+              ) : allFilteredItems.length > 0 ? (
+                allFilteredItems.map((item, idx) => (
+                  <MenuItemCard key={`search-${item.baseName}-${idx}`} item={item} imageIndex={idx} expandedImageId={expandedImageId} onImageExpand={setExpandedImageId} />
+                ))
+              ) : (
+                <div className="col-12 text-center py-5 text-muted">
+                  <p className="mb-0">No hay productos que coincidan con &quot;{searchQuery}&quot;</p>
+                  <p className="small mt-2">Prueba con otro término o limpia la búsqueda</p>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* Sin búsqueda: menú por categorías */}
+        {!isSearchActive && (
+          <>
         {/* Bebidas Calientes */}
         <section id="bebidas-calientes" className="mb-5 menu-section" data-aos="fade-up">
           <div className="section-header-wrapper mb-4">
@@ -849,11 +962,13 @@ export default function MenuPage({ onClose, onCartClick, isCartOpen }){
             ) : null}
           </div>
         </section>
+          </>
+        )}
       </div>
       {/* Botón flotante del carrito */}
       <FloatingCartButton onClick={onCartClick} isCartOpen={isCartOpen} />
       {/* Botón flotante del menú de categorías */}
-      <FloatingMenuButton isCartOpen={isCartOpen} />
+      <FloatingMenuButton isCartOpen={isCartOpen} onCategorySelect={handleCategorySelectFromFloating} />
     </div>
   )
 }

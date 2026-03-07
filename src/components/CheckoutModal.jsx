@@ -90,9 +90,12 @@ export default function CheckoutModal({ isOpen, onClose, onConfirm, cartItems })
   
   const handleSubmit = (e) => {
     e.preventDefault()
-    
+    const nombre = nombreCliente.trim()
+    if (!nombre) {
+      return
+    }
     const checkoutData = {
-      nombre_cliente: nombreCliente.trim() || null,
+      nombre_cliente: nombre,
       tipo_servicio: tipoServicio,
       comentarios: comentarios.trim() || null,
       tipo_leche: null, // Ya no se usa globalmente, está en cada item
@@ -192,11 +195,12 @@ export default function CheckoutModal({ isOpen, onClose, onConfirm, cartItems })
                     fontSize: '0.9375rem'
                   }}
                 >
-                  Nombre del Cliente <span style={{color: 'var(--text-light)'}}>(Opcional)</span>
+                  Nombre del Cliente <span style={{color: 'var(--red-500)', marginLeft: '2px'}}>*</span>
                 </label>
                 <input
                   type="text"
                   id="nombreCliente"
+                  required
                   value={nombreCliente}
                   onChange={(e) => setNombreCliente(e.target.value)}
                   placeholder="Ej: Juan Pérez"
