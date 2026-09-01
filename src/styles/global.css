@@ -2925,6 +2925,22 @@ img[src] {
 
 
 /* ============================================
+   LAZY IMAGE LOADING
+   ============================================ */
+@keyframes lazy-loading {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.lazy-image-placeholder {
+  animation: lazy-loading 1.5s infinite ease-in-out;
+}
+
+/* ============================================
    REGLA CRÍTICA: PREVENIR SCROLL HORIZONTAL EN MÓVIL
    ============================================ */
 @media (max-width: 767px) {
@@ -2932,12 +2948,12 @@ img[src] {
   * {
     max-width: 100vw !important;
   }
-  
+
   /* Excepciones para elementos inline de texto */
   span:not([class]), a:not([class]), em, strong, small, b, i, u, mark, code {
     max-width: none !important;
   }
-  
+
   /* Asegurar que contenedores principales no se salgan */
   html, body, #root, .app {
     overflow-x: hidden !important;
@@ -2945,7 +2961,7 @@ img[src] {
     width: 100% !important;
     position: relative !important;
   }
-  
+
   /* Todos los contenedores con padding ajustado */
   .container, [class*="container"], [class*="wrapper"], [class*="section"] {
     padding-left: 1rem !important;
@@ -2954,12 +2970,12 @@ img[src] {
     width: 100% !important;
     box-sizing: border-box !important;
   }
-  
+
   /* Elementos con position absolute/fixed que no se salgan */
   [class*="floating"], [class*="carousel"], [class*="nav"] {
     max-width: calc(100vw - 2rem) !important;
   }
-  
+
   /* Imágenes y media */
   img, video, iframe, svg, canvas {
     max-width: 100% !important;

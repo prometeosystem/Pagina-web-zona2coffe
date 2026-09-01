@@ -34,14 +34,18 @@ export const getProducts = async () => {
   } catch (error) {
     // Mejorar el mensaje de error para problemas de conexión
     if (error.name === 'TypeError' && error.message.includes('fetch')) {
-      console.error('Error de conexión con el backend:', {
-        message: error.message,
-        url: `${API_BASE_URL}/productos/ver_productos`,
-        suggestion: 'Verifica que el backend esté corriendo en el puerto 8000'
-      })
+      if (import.meta.env.DEV) {
+        console.error('Error de conexión con el backend:', {
+          message: error.message,
+          url: `${API_BASE_URL}/productos/ver_productos`,
+          suggestion: 'Verifica que el backend esté corriendo en el puerto 8000'
+        })
+      }
       throw new Error('No se pudo conectar con el servidor. Verifica que el backend esté corriendo.')
     }
-    console.error('Error obteniendo productos:', error)
+    if (import.meta.env.DEV) {
+      console.error('Error obteniendo productos:', error)
+    }
     throw error
   }
 }
@@ -58,7 +62,9 @@ export const validateProduct = async (productId) => {
     const product = products.find(p => p.id_producto === productId || p.id === productId)
     return product !== undefined && product.activo !== false
   } catch (error) {
-    console.error('Error validando producto:', error)
+    if (import.meta.env.DEV) {
+      console.error('Error validando producto:', error)
+    }
     // Si falla la validación, permitimos agregar el producto para no bloquear la experiencia
     return true
   }
@@ -87,7 +93,9 @@ export const createPreorden = async (preordenData, detalles) => {
     }
 
     // Debug: Log del payload que se envía
-    console.log('Payload enviado al backend:', JSON.stringify(preordenPayload, null, 2))
+    if (import.meta.env.DEV) {
+      console.log('Payload enviado al backend:', JSON.stringify(preordenPayload, null, 2))
+    }
 
     const response = await fetch(`${API_BASE_URL}/preordenes/crear_preorden`, {
       method: 'POST',
@@ -103,23 +111,31 @@ export const createPreorden = async (preordenData, detalles) => {
       try {
         const errorData = await response.json()
         errorMessage = errorData.detail || errorData.message || errorMessage
-        console.error('Error del backend:', errorData)
+        if (import.meta.env.DEV) {
+          console.error('Error del backend:', errorData)
+        }
       } catch (e) {
         // Si no se puede parsear el JSON, obtener el texto
         const text = await response.text()
         if (text) {
           errorMessage = `${errorMessage} - ${text}`
         }
-        console.error('Error al parsear respuesta del backend:', text)
+        if (import.meta.env.DEV) {
+          console.error('Error al parsear respuesta del backend:', text)
+        }
       }
       throw new Error(errorMessage)
     }
 
     const data = await response.json()
-    console.log('Respuesta exitosa del backend:', data)
+    if (import.meta.env.DEV) {
+      console.log('Respuesta exitosa del backend:', data)
+    }
     return data
   } catch (error) {
-    console.error('Error creando pre-orden:', error)
+    if (import.meta.env.DEV) {
+      console.error('Error creando pre-orden:', error)
+    }
     throw error
   }
 }

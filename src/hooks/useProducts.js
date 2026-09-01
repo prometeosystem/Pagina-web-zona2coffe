@@ -107,7 +107,9 @@ export const useProducts = () => {
         
         setProducts(transformedProducts)
       } catch (err) {
-        console.error('Error obteniendo productos:', err)
+        if (import.meta.env.DEV) {
+          console.error('Error obteniendo productos:', err)
+        }
         setError(err.message || 'Error al cargar los productos')
         // En caso de error, mantener array vacío para que no se rompa la UI
         setProducts([])
