@@ -3,6 +3,7 @@ import { useCart } from '../context/CartContext'
 import { useProductsByCategory } from '../hooks/useProducts'
 import FloatingCartButton from './FloatingCartButton'
 import FloatingMenuButton from './FloatingMenuButton'
+import LazyImage from './LazyImage'
 
 // Función para extraer el nombre base del producto (sin tamaño)
 const getBaseName = (name) => {
@@ -328,7 +329,9 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
         }
       }
     } catch (error) {
-      console.error('Error agregando al carrito:', error)
+      if (import.meta.env.DEV) {
+        console.error('Error agregando al carrito:', error)
+      }
     } finally {
       setAddingToCart(false)
     }
@@ -355,21 +358,27 @@ const MenuItemCard = ({ item, imageIndex, expandedImageId, onImageExpand }) => {
           }}
         >
           {backendImage && !imageError && (
-            <div 
+            <div
               className={`menu-item-image-wrapper ${imageExpanded ? 'menu-image-expanded-overlay' : ''}`}
-              style={{cursor: 'pointer'}}
-              onClick={(e) => {
-                e.stopPropagation()
-                onImageExpand(imageExpanded ? null : productId)
-              }}
             >
-              <img 
-                src={backendImage} 
+              <LazyImage
+                src={backendImage}
                 className={`card-img-top menu-item-image ${imageExpanded ? 'menu-image-expanded' : ''}`}
                 alt={item.name || item.nombre}
+                placeholder="Cargando imagen del producto..."
+                threshold={0.1}
+                rootMargin="100px"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onImageExpand(imageExpanded ? null : productId)
+                }}
                 onError={() => {
                   // Si la imagen falla al cargar, marcarla como error para ocultarla
                   setImageError(true)
+                }}
+                style={{
+                  cursor: 'pointer',
+                  borderRadius: imageExpanded ? '0' : '0.25rem 0.25rem 0 0'
                 }}
               />
             </div>

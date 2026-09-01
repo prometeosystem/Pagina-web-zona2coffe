@@ -36,8 +36,53 @@ npm run dev
 
 3. Abrir `http://localhost:5173` (o la URL que indique Vite).
 
+## Ecosistema de repos
+
+| Repo | Responsabilidad |
+|------|-----------------|
+| `punto-venta-cafeteria-BackEnd` | API FastAPI + MySQL |
+| `punto-venta-cafeteria` | Frontend POS |
+| `Pagina-web-zona2coffe` (este) | Sitio web público |
+
+## Cómo trabajar cambios
+
+Historial **lineal** (estilo fast-forward / rebase). No se hace push directo a `main`.
+
+1. Clonar y usar la rama de trabajo:
+   ```bash
+   git clone https://github.com/prometeosystem/Pagina-web-zona2coffe.git
+   cd Pagina-web-zona2coffe
+   git checkout dev-juan
+   git pull --ff-only origin dev-juan
+   ```
+2. Crear una rama de feature desde `dev-juan`:
+   ```bash
+   git checkout -b feature/nombre-corto
+   ```
+3. Hacer commits pequeños y claros (evitar secretos: `.env`, tokens).
+4. Antes de subir, actualizar con fast-forward only:
+   ```bash
+   git fetch origin
+   git pull --ff-only origin dev-juan
+   ```
+5. Push de la feature y abrir PR hacia `dev-juan` (integración a `main` con PR `dev-juan` → `main`).
+6. Esperar CI verde (GitHub Actions).
+7. Merge con **Rebase and merge** (historial lineal).
+8. Si `main` avanzó, rebasear antes del PR:
+   ```bash
+   git fetch origin
+   git rebase origin/main
+   ```
+9. Nunca: push forzado a `main`, ni commits de `node_modules/`, `dist/` o `.env`.
+
+Configuración local recomendada (solo en este repo):
+
+```bash
+git config pull.ff only
+```
+
 ## Notas y siguientes pasos
 - Copia tu logo exportado (`logo.png`) y las fotos (ej. `coffee1.jpg`...) a `public/` o `public/assets/`.
- - Copia tu logo exportado (`logo.png`) y las fotos (ej. `imagenUno.jpg`...) a `public/assets/`.
+- Copia tu logo exportado (`logo.png`) y las fotos (ej. `imagenUno.jpg`...) a `public/assets/`.
 - Reemplaza `src/data/menu.json` con tu menú real (o implementa API).
 - Puedo añadir: rutas, carrito y formulario de contacto.
