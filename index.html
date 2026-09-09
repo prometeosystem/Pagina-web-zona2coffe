@@ -1,15 +1,259 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Cormorant+Garamond:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <title>Zona 2 - Coffee Recovery</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+	<title>ZONA 2 — Brunch and Run</title>
+	<meta name="description" content="Zona 2 no es solo café. Es un espacio creado para recuperar energía, optimizar el rendimiento y volver al ritmo que te mueve.">
+
+	<meta property="og:url" content="https://zona2.mx">
+	<meta property="og:type" content="website">
+	<meta property="og:title" content="ZONA 2">
+	<meta property="og:description" content="Zona 2 no es solo café. Es un espacio creado para recuperar energía, optimizar el rendimiento y volver al ritmo que te mueve.">
+	<meta property="og:image" content="images/hero-run.jpg">
+
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:title" content="ZONA 2">
+	<meta name="twitter:description" content="Zona 2 no es solo café. Es un espacio creado para recuperar energía, optimizar el rendimiento y volver al ritmo que te mueve.">
+	<meta name="twitter:image" content="images/hero-run.jpg">
+
+	<script type="application/ld+json">
+	{
+		"@context": "https://schema.org",
+		"@type": "CafeOrCoffeeShop",
+		"name": "Zona 2 Coffee Recovery",
+		"description": "Zona 2 no es solo café. Un espacio para recuperar energía, optimizar el rendimiento y volver al ritmo que te mueve.",
+		"address": {
+			"@type": "PostalAddress",
+			"streetAddress": "C. Ceres 109",
+			"addressLocality": "Cuernavaca",
+			"addressRegion": "Morelos",
+			"postalCode": "62330",
+			"addressCountry": "MX"
+		},
+		"geo": {
+			"@type": "GeoCoordinates",
+			"latitude": 18.9420483,
+			"longitude": -99.2078476
+		},
+		"url": "https://maps.app.goo.gl/sAerRQdmykJRfuVY9",
+		"hasMap": "https://maps.app.goo.gl/sAerRQdmykJRfuVY9"
+	}
+	</script>
+
+	<link rel="icon" type="image/svg+xml" href="images/favicon.svg">
+
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Great+Vibes&family=Outfit:wght@300;400;500;600&family=Saira+Extra+Condensed:ital,wght@1,700;1,800&display=swap" rel="stylesheet">
+
+	<link rel="stylesheet" href="css/style.css">
+
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/11.0.5/swiper-bundle.min.css">
+	<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+	<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+	<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+</head>
+<body>
+	<label for="check" id="burger" class="abierto">
+		<input type="checkbox" id="check">
+		<span></span>
+		<span></span>
+		<span></span>
+	</label>
+
+	<nav id="menu-nav">
+		<article>
+			<a class="desplazamiento" href="#inicio">home</a>
+			<a class="desplazamiento" href="#quienes-somos">el espacio</a>
+			<a class="desplazamiento" href="#menu">nuestro menú</a>
+			<a class="desplazamiento" href="#ubicacion">ubicación</a>
+			<a class="desplazamiento" href="#resenas">reseñas</a>
+		</article>
+		<aside></aside>
+	</nav>
+
+	<header>
+		<img class="logo" src="images/logo-zona2.svg" alt="Zona 2 Brunch and Run">
+	</header>
+
+	<section class="home" id="inicio">
+		<aside class="swiper">
+			<div class="swiper-wrapper">
+				<article class="swiper-slide" style="background-image: url(images/hero-run.jpg);"></article>
+				<article class="swiper-slide" style="background-image: url(images/hero-coffee.jpg);"></article>
+				<article class="swiper-slide" style="background-image: url(images/hero-food.jpg);"></article>
+				<article class="swiper-slide" style="background-image: url(images/hero-community.jpg);"></article>
+			</div>
+		</aside>
+		<h1 data-aos="fade-up" data-aos-duration="300">CAFÉ DE DÍA</h1>
+		<h1 data-aos="fade-up" data-aos-duration="600">RITMO DE VIDA</h1>
+		<div class="cronometro" aria-hidden="true">
+			<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+				<circle cx="200" cy="200" r="188" stroke="#a8c258" stroke-opacity="0.2" stroke-width="1.4" fill="none"/>
+				<circle cx="200" cy="200" r="168" stroke="#a8c258" stroke-opacity="0.55" stroke-width="3" stroke-dasharray="2 16.6" fill="none"/>
+				<circle cx="200" cy="200" r="120" stroke="#f2e9d6" stroke-opacity="0.28" stroke-width="1.2" fill="none"/>
+				<g class="manecilla-grupo">
+					<line x1="200" y1="200" x2="200" y2="55" stroke="#a8c258" stroke-opacity="0.85" stroke-width="2" stroke-linecap="round"/>
+				</g>
+				<g class="manecilla-central">
+					<line x1="200" y1="200" x2="200" y2="90" stroke="#f2e9d6" stroke-opacity="0.5" stroke-width="2.5" stroke-linecap="round"/>
+				</g>
+				<circle cx="200" cy="200" r="6" fill="#a8c258"/>
+			</svg>
+		</div>
+	</section>
+
+	<div class="cintilla" aria-hidden="true">
+		<div class="fila">
+			<span>ZONA 2 <i>●</i></span><span>NO ES SOLO CAFÉ <i>●</i></span><span>RECUPERA <i>●</i></span><span>RINDE <i>●</i></span><span>VUELVE AL RITMO <i>●</i></span>
+			<span>ZONA 2 <i>●</i></span><span>NO ES SOLO CAFÉ <i>●</i></span><span>RECUPERA <i>●</i></span><span>RINDE <i>●</i></span><span>VUELVE AL RITMO <i>●</i></span>
+		</div>
+	</div>
+	<div class="cintilla reversa" aria-hidden="true">
+		<div class="fila">
+			<span>CAFÉ DE ESPECIALIDAD <i>●</i></span><span>COMUNIDAD <i>●</i></span><span>CONSTANCIA <i>●</i></span><span>EQUILIBRIO <i>●</i></span>
+			<span>CAFÉ DE ESPECIALIDAD <i>●</i></span><span>COMUNIDAD <i>●</i></span><span>CONSTANCIA <i>●</i></span><span>EQUILIBRIO <i>●</i></span>
+		</div>
+	</div>
+
+	<section class="ritmo">
+		<h2>Brunch and Run</h2>
+		<div class="franja" aria-hidden="true">
+			<div class="fila">
+				<span>zona 2</span><span>·</span><span>no es solo café</span><span>·</span><span>recupera</span><span>·</span><span>rinde</span><span>·</span><span>vuelve al ritmo</span>
+				<span>zona 2</span><span>·</span><span>no es solo café</span><span>·</span><span>recupera</span><span>·</span><span>rinde</span><span>·</span><span>vuelve al ritmo</span>
+			</div>
+		</div>
+		<svg class="senda" viewBox="0 0 1000 48" preserveAspectRatio="none" aria-hidden="true">
+			<path id="senda-path" d="M20,28 C 180,8 280,44 500,24 S 780,6 980,28"/>
+			<circle r="4" fill="currentColor">
+				<animateMotion dur="7s" repeatCount="indefinite"><mpath href="#senda-path"/></animateMotion>
+			</circle>
+		</svg>
+		<div class="ritmo-duo">
+			<article class="circulos">
+				<svg viewBox="0 0 500 500">
+					<path id="circulo-1" d="M50,250c0-110.5,89.5-200,200-200s200,89.5,200,200s-89.5,200-200,200S50,360.5,50,250"></path>
+					<text><textPath href="#circulo-1">ZONA 2. CAFÉ. RUN. RECUPERA. ZONA 2.</textPath></text>
+				</svg>
+				<svg viewBox="0 0 500 500">
+					<path id="circulo-2" d="M50,250c0-110.5,89.5-200,200-200s200,89.5,200,200s-89.5,200-200,200S50,360.5,50,250"></path>
+					<text><textPath href="#circulo-2">CAFÉ. RUN. RECUPERA. ZONA 2. CAFÉ.</textPath></text>
+				</svg>
+				<svg viewBox="0 0 500 500">
+					<path id="circulo-3" d="M50,250c0-110.5,89.5-200,200-200s200,89.5,200,200s-89.5,200-200,200S50,360.5,50,250"></path>
+					<text><textPath href="#circulo-3">RUN. RECUPERA. ZONA 2. CAFÉ. RUN.</textPath></text>
+				</svg>
+				<svg viewBox="0 0 500 500">
+					<path id="circulo-4" d="M50,250c0-110.5,89.5-200,200-200s200,89.5,200,200s-89.5,200-200,200S50,360.5,50,250"></path>
+					<text><textPath href="#circulo-4">RECUPERA. ZONA 2. CAFÉ. RUN. RECUPERA.</textPath></text>
+				</svg>
+			</article>
+			
+		</div>
+		<div class="fondo"></div>
+	</section>
+
+	<section class="quienes-somos" id="quienes-somos">
+		<div class="quienes-cuerpo">
+			<div class="quienes-texto">
+				<h2>QUIÉNES<br>SOMOS</h2>
+				<h1>un espacio</h1>
+				<h1>que no sólo</h1>
+				<h1>es un café</h1>
+				<p>Zona 2 es un espacio creado para recuperar energía, optimizar el rendimiento y volver al ritmo que te mueve.</p>
+				<p>En el running, la zona 2 es donde el cuerpo aprende a sostener, recuperar y construir energía. Ese principio es el que vive aquí.</p>
+				<p>Creemos en los rituales que suman: café bien preparado, comida que nutre y un entorno que te permite bajar el ritmo para volver más fuerte.</p>
+			</div>
+			<div class="galeria-espacio swiper">
+				<div class="swiper-wrapper">
+					<article class="swiper-slide" style="background-image: url(images/espacio.jpg);"></article>
+					<article class="swiper-slide" style="background-image: url(images/concepto.jpg);"></article>
+					<article class="swiper-slide" style="background-image: url(images/hero-community.jpg);"></article>
+					<article class="swiper-slide" style="background-image: url(images/hero-coffee.jpg);"></article>
+					<article class="swiper-slide" style="background-image: url(images/menu-cafe.jpg);"></article>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="experiencia">
+		<aside>
+			<h1>Recupérate<br>aquí</h1>
+			<h2>CAFÉ ANTES. COMIDA DESPUÉS.</h2>
+			<div id="menu">
+				<aside class="svg-1">
+					<div class="rasgada" style="background-image: url(images/menu-cafe.jpg);"></div>
+					<h4>café</h4>
+					<p>energía para el esfuerzo</p>
+					<a class="abrir-carta" href="images/Wod%20Drinks.jpeg"><i class="fa-regular fa-file-lines"></i> &nbsp;ver carta de café</a>
+				</aside>
+				<aside class="svg-2">
+					<div class="rasgada" style="background-image: url(images/menu-cocina.jpg);"></div>
+					<h4>cocina</h4>
+					<p>reponer lo gastado</p>
+					<a class="abrir-carta" href="images/Wod%20Food.jpeg"><i class="fa-regular fa-file-lines"></i> &nbsp;ver carta de cocina</a>
+				</aside>
+			</div>
+			<h3>2</h3>
+		</aside>
+	</section>
+
+	<div class="visor-carta" id="visor-carta" hidden>
+		<button type="button" class="visor-cerrar" id="visor-cerrar" aria-label="cerrar carta">cerrar</button>
+		<img id="visor-carta-img" alt="Carta Zona 2">
+	</div>
+
+	<section class="resenas" id="resenas">
+		<h2>google</h2>
+		<h1>lo que se dice</h1>
+		<p>La comunidad deja su ritmo en Google. Aquí está el mapa del local en Delicias y el acceso a las reseñas reales.</p>
+		<div class="resenas-cuerpo">
+			<div class="mapa-vivo">
+				<iframe
+					title="Zona 2 Coffee Recovery en Google Maps"
+					src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3774.8!2d-99.2078476!3d18.9420483!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85cddf0033256fdf%3A0x43984a19122b93ee!2sZona%202%20Coffee%20Recovery!5e0!3m2!1ses-419!2smx!4v1720000000000!5m2!1ses-419!2smx"
+					loading="lazy"
+					referrerpolicy="no-referrer-when-downgrade"
+					allowfullscreen></iframe>
+			</div>
+			<aside class="resenas-panel">
+				<div class="rating-google" id="rating-google">
+					<span class="g-mark">G</span>
+					<div>
+						<strong>Zona 2 Coffee Recovery</strong>
+						<p>reseñas de google</p>
+					</div>
+				</div>
+				<div class="estrellas" id="estrellas-google" aria-hidden="true">★★★★★</div>
+				<p class="rating-numero" id="rating-numero">Abre Google para leer las opiniones reales del espacio.</p>
+				<div class="resenas-lista" id="resenas-lista"></div>
+				<a class="btn-maps" href="https://maps.app.goo.gl/sAerRQdmykJRfuVY9" target="_blank" rel="noopener">ver reseñas en google</a>
+				<a class="btn-maps btn-maps-claro" href="https://www.google.com/maps/dir/?api=1&destination=18.9420483,-99.2078476" target="_blank" rel="noopener">cómo llegar</a>
+			</aside>
+		</div>
+	</section>
+
+	<footer id="ubicacion">
+		<p class="pie-lugar">Delicias · Cuernavaca</p>
+		<h1>vuelve al ritmo</h1>
+		<p>C. Ceres 109, Delicias, 62330 Cuernavaca, Morelos.</p>
+		<a class="pie-cta" href="https://www.google.com/maps/dir/?api=1&destination=18.9420483,-99.2078476" target="_blank" rel="noopener">cómo llegar</a>
+		<div class="pie-final">
+			<img class="logo-pie" src="images/logo-zona2.svg" alt="Zona 2">
+			<span>café · recuperación · ritmo</span>
+		</div>
+		<a class="pie-prothec" href="https://prothec.com.mx/" target="_blank" rel="noopener">
+			<img src="images/logo-prothec.png" alt="Prothec">
+			<span>desarrollado por prothec</span>
+		</a>
+	</footer>
+
+	<script src="js/script.js"></script>
+</body>
 </html>
